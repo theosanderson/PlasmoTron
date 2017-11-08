@@ -4,8 +4,8 @@ import time
 import string
 dbd = sqlite3.connect('flaskr.db', timeout=100000)
 equipment = {}
-#robot.connect(robot.get_serial_ports_list()[0])
-robot.connect()
+robot.connect(robot.get_serial_ports_list()[0])
+#robot.connect()
 if not robot.is_connected():
 	raise Exception('Did not connect') 
 
