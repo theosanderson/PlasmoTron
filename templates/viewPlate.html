@@ -1,0 +1,80 @@
+{% extends "layout.html" %}
+{% block body %}
+ <h2>Plate: {{ plate.PlateName }} <small>({{ plate.PlateRows * plate.PlateCols }})</small></h2>
+    <form action="{{ url_for('add_culture') }}" method=post class=add-entry>
+      <h3>Define a new culture and add to this plate</h3>
+      <dl>
+        <dt>Culture name:
+        <dd><input type=text size=30 name=title>
+     <input type=hidden size=30 name=plateID value="{{plate.PlateID}}"> <input name="row" style="width:20px;" id="row"><input name="col" style="width:20px;" id="col"><input value="Add" type="submit">
+      </dl>
+    </form>
+<h1></h1>
+  
+<h3>Plate layout</h3>
+  <table class="plate" id="plate">
+  {% for row in rows %}
+  <tr>
+  {% for col in row %}
+
+    <td><a 
+      {%if col.Status == 10 %} style="color:gray" {% endif %} href="/culture/{{ col.CultureID }}">{{ col.CultureName }}</a></td>
+      {% endfor %}
+    </tr>
+  {% else %}
+    <tr><td>No cultures defined</td></tr>
+  {% endfor %}
+  <div id="ref" style="width:50px;height:30px"></div>
+  
+</table>
+
+    <form action="{{ url_for('process_plate') }}" method=post class=add-entry>
+      <h3>Process plate</h3>
+      <dl>
+        <dt>Custom action:
+        <dd><input type=hidden size=30 name=plateid value="{{plate.PlateID}}"><select name="manual"><option value="auto">Automatic</option><option value="feed">Feed</option><option value="split">Split</option><option value="feedandaliquot">Feed and aliquot</option><option value="feedanddiscard30">Feed and discard 30</option></select><input type="submit" value="Plan plate processing" /></dd>
+
+        Rows used (P200): <input name="tips200"  id="tip200" value="0"/>
+
+        Tips used (P1000):<input name="tips1000" id="tip1000" value="0"/>
+      <script>  
+            $.fn.numpad.defaults.gridTpl = '<table class="table modal-content"></table>';
+      $.fn.numpad.defaults.backgroundTpl = '<div class="backdrop"></div>';
+      $.fn.numpad.defaults.displayTpl = '<input type="text" class="form-control" />';
+      $.fn.numpad.defaults.buttonNumberTpl =  '<button type="button" class="btn btn-default"></button>';
+      $.fn.numpad.defaults.buttonFunctionTpl = '<button type="button" class="btn" style="width: 100%;"></button>';
+      $.fn.numpad.defaults.onKeypadCreate = function(){$(this).find('.done').addClass('btn-primary');};
+      
+  $('#tip1000').numpad();
+</script>
+   
+      </dl>
+    </form>
+    <script>
+    $('table#plate td').click(function(){
+      $('#col').val(this.cellIndex);
+      $('#row').val(this.parentNode.rowIndex);
+      $('.highlight').removeClass('highlight');
+      $(this).toggleClass("highlight");
+});
+
+        $('table#plate td').mouseover(function(){
+      col=this.cellIndex +1;
+      row=this.parentNode.rowIndex + 1;
+      row=String.fromCharCode(row+64)
+      $('#ref').html(row+col);
+      
+     
+});
+        $('table#plate td').mouseout(function(){
+     
+      $('#ref').html("");
+      
+     
+});
+
+
+
+</script>
+
+{% endblock %}

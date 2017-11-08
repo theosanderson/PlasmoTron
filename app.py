@@ -1,0 +1,421 @@
+# all the imports
+from __future__ import print_function
+import os
+import sqlite3
+import time
+import sys
+import datetime
+import re
+from flask import Flask, request, session, g, redirect, url_for, abort, \
+     render_template, flash
+import sys
+
+def eprint(*args, **kwargs):
+    print(*args, file=sys.stderr, **kwargs)
+app = Flask(__name__) # create the application instance :)
+app.config.from_object(__name__) # load config from this file , flaskr.py
+
+# Load default config and override config from an environment variable
+app.config.update(dict(
+    DATABASE=os.path.join(app.root_path, 'flaskr.db'),
+    SECRET_KEY='development key',
+    USERNAME='admin',
+    PASSWORD='default',
+    DEBUG=True
+))
+app.config.from_envvar('FLASKR_SETTINGS', silent=True)
+import string
+numberstoletters = dict(enumerate(string.ascii_uppercase, 1))
+def formatRowColumn(Row,Column):
+    if Row == None :
+        newrow=""
+    else:
+        newrow=numberstoletters[Row+1]
+    if Column == None :
+        newcol=""
+    else:
+        newcol=Column+1
+    return(newrow+str(newcol))
+def displayTime(timer):
+    value = datetime.datetime.fromtimestamp(timer)
+    return(value.strftime('%Y-%m-%d %H:%M:%S'))
+app.jinja_env.globals.update(formatRowColumn=formatRowColumn,displayTime=displayTime)
+
+def connect_db():
+    """Connects to the specific database."""
+    rv = sqlite3.connect(app.config['DATABASE'],timeout=30)
+    #rv.execute('PRAGMA journal_mode=wal')
+    rv.row_factory = sqlite3.Row
+    return rv
+def get_db():
+    """Opens a new database connection if there is none yet for the
+    current application context.
+    """
+    if not hasattr(g, 'sqlite_db'):
+        g.sqlite_db = connect_db()
+    return g.sqlite_db
+
+@app.teardown_appcontext
+def close_db(error):
+    """Closes the database again at the end of the request."""
+    if hasattr(g, 'sqlite_db'):
+        g.sqlite_db.close()
+
+def init_db():
+    db = get_db()
+    with app.open_resource('model.mysql', mode='r') as f:
+        db.cursor().executescript(f.read())
+    db.commit()
+
+@app.cli.command('initdb')
+def initdb_command():
+    """Initializes the database."""
+    init_db()
+    print('Initialized the database.')
+@app.route('/')
+def show_plates():
+    db = get_db()
+    cur = db.execute('select Plates.PlateID, Plates.PlateName, COUNT(PlatePositions.Row) AS count, PlatePurpose, PlateFinished from Plates LEFT JOIN PlatePositions ON PlatePositions.PlateID=Plates.PlateID GROUP BY Plates.PlateID order by Plates.PlateID desc')
+    entries = cur.fetchall()
+    return render_template('showPlates.html', entries=entries)
+
+@app.route('/plate/<plateID>')
+def show_plate(plateID):
+    db = get_db()
+    cur = db.execute('select * FROM Plates INNER JOIN PlateClasses ON Plates.PlateClass= PlateClasses.PlateClassID WHERE PlateID= ?',[plateID])
+    plate = cur.fetchone()
+    cur = db.execute('select * FROM Cultures INNER JOIN PlatePositions ON Cultures.CultureID = PlatePositions.CultureID WHERE PlateID= ?',[plateID])
+    entries = cur.fetchall()
+    dimx=plate['PlateRows']
+    dimy=plate['PlateCols']
+    rows = [[{"name":"", "id": -1} for i in range(dimy)] for j in range(dimx)]
+    for entry in entries:
+        rows[entry['Row']][entry['Column']]=entry
+    return render_template('viewPlate.html', plate=plate,rows=rows)
+
+@app.route('/culture/<cultureID>')
+def show_culture(cultureID):
+    db = get_db()
+
+    cur = db.execute('select * FROM Cultures INNER JOIN PlatePositions ON Cultures.CultureID = PlatePositions.CultureID INNER JOIN Plates ON PlatePositions.PlateID=Plates.PlateID  WHERE Cultures.CultureID= ?',[cultureID])
+    culture = cur.fetchone()
+    cur = db.execute('select * FROM CommandQueue WHERE PlateID = ? AND Row = ? AND Column = ?',[culture['PlateID'], culture['Row'], culture['Column']])
+    history = cur.fetchall()
+    cur = db.execute('select * FROM Actions WHERE PlateID = ? AND Row = ? AND Column = ?',[culture['PlateID'], culture['Row'], culture['Column']])
+    actions = cur.fetchall()
+    
+    return render_template('viewCulture.html', culture=culture,history=history,actions=actions)
+
+
+
+
+@app.route('/addculture', methods=['POST'])
+def add_culture():
+
+    db = get_db()
+    cur = db.execute('SELECT PlateRows,PlateCols FROM Plates INNER JOIN PlateClasses ON Plates.PlateClass= PlateClasses.PlateClassID WHERE PlateID= ?',[request.form['plateID']])
+    platestats=cur.fetchone();
+    cur = db.execute('SELECT MAX(Column) AS maxCol FROM PlatePositions WHERE PlateID= ?',[request.form['plateID']])
+    posresults=cur.fetchone();
+
+    if posresults['maxCol'] is None:
+        currentRow=-1
+        currentCol=0
+    else:
+       currentCol=posresults['maxCol']
+       cur = db.execute('SELECT MAX(Row) AS maxRow FROM PlatePositions WHERE PlateID= ? AND Column = ?',[request.form['plateID'],currentCol])
+       posresults=cur.fetchone();
+       currentRow=posresults['maxRow']
+
+
+    currentRow=currentRow+1
+    if currentRow==platestats["PlateRows"]:
+      currentRow=0
+      currentCol=currentCol+1
+    if request.form['row'] is not '' and request.form['col'] is not "":
+        currentRow=int(request.form['row'])
+        currentCol=int(request.form['col'])
+    if currentRow >= platestats['PlateRows'] or currentCol >= platestats['PlateCols']:
+        flash('Culture was attempted to be created outside bounds of plate')
+        return redirect(url_for('show_plate',plateID=request.form['plateID']))
+    print("Hello world!", file=sys.stderr)
+    db.execute('insert into Cultures (CultureName) values (?)',
+                 [request.form['title']])
+    db.execute('insert into PlatePositions (CultureID,PlateID,Row,Column) values (last_insert_rowid(),?,?,?)',
+                 [request.form['plateID'],currentRow,currentCol])
+    db.commit()
+    flash('New culture successfully created and added to the plate')
+    return redirect(url_for('show_plate',plateID=request.form['plateID']))
+
+@app.route('/addplate', methods=['POST'])
+
+def add_plate():
+
+    db = get_db()
+    db.execute('insert into Plates (PlateName,PlateClass,PlateFinished,PlatePurpose) values (?,?,0,1)',
+                 [request.form['title'],request.form['class']])
+    db.commit()
+    flash('New plate was successfully added')
+    return redirect(url_for('show_plates'))
+
+@app.route('/addmanualaction', methods=['POST'])
+def add_manual_action():
+    
+    timestamp = int(time.time())
+    db = get_db()
+    db.execute('insert into Actions (PlateID,Row,Column,TypeOfOperation,ActionText,ActionTime) values (?,?,?,?,?,?)',
+                 [request.form['plateid'],request.form['row'],request.form['col'],"custom",request.form['text'],timestamp])
+    db.commit()
+    flash('The action was successfully added')
+    return redirect(url_for('show_culture',cultureID=request.form['cultureid']))
+
+@app.route('/processplate', methods=['POST'])
+def process_plate():
+    tipcounter=[int(request.form['tips1000']),int(request.form['tips200'])]
+    maxtips=[96,8]
+    dimensions=[[12,8] , [12,1]]
+    pipettenames=['p1000','p200x8']
+    MeasurementPlate=None;
+    MeasurementAvailableWells=[]
+    def getTip(pipette):
+        nonlocal tipcounter
+        nonlocal db
+        
+        if tipcounter[pipette] == maxtips[pipette]:
+            cur = db.execute('INSERT INTO CommandQueue (Command) VALUES ("MoreTips")');
+            tipcounter[pipette]=0;
+        col, row =divmod(tipcounter[pipette], dimensions[pipette][1])
+        cur = db.execute('INSERT INTO CommandQueue (Command, Pipette, Labware, Row, Column) VALUES ("GetTips",?,"p1000rack",?,?)',[pipettenames[pipette],row,col])
+        
+        tipcounter[pipette]= tipcounter[pipette]+1
+    def dropTip(pipette):
+        cur = db.execute('INSERT INTO CommandQueue (Command, Pipette, Labware) VALUES ("DropTip",?,"trash")',[pipettenames[pipette]]);
+    def aspirate(pipette,labware,volume,row=None,col=None,plateid=None):
+        cur = db.execute('INSERT INTO CommandQueue (Command, Pipette, Volume, Labware, Row, Column, PlateID) VALUES ("Aspirate",?,?,?,?,?,?)',[pipettenames[pipette],volume,labware,row,col,plateid])
+    def dispense(pipette,labware,volume,row=None,col=None,oncompletion=None,plateid=None,bottom=False):
+        if(bottom==True):
+            cur = db.execute('INSERT INTO CommandQueue (Command, Pipette, Volume, Labware, Row, Column,OnCompletion,PlateID) VALUES ("DispenseBottom",?,?,?,?,?,?,?)',[pipettenames[pipette],volume,labware,row,col,oncompletion,plateid])
+        else:
+            cur = db.execute('INSERT INTO CommandQueue (Command, Pipette, Volume, Labware, Row, Column,OnCompletion,PlateID) VALUES ("Dispense",?,?,?,?,?,?,?)',[pipettenames[pipette],volume,labware,row,col,oncompletion,plateid])
+    
+    def resuspend(pipette,labware,volume,row=None,col=None,plateid=None):
+        cur = db.execute('INSERT INTO CommandQueue (Command, Pipette, Volume, Labware, Row, Column,PlateID) VALUES ("Resuspend",?,?,?,?,?,?)',[pipettenames[pipette],volume,labware,row,col,plateid])
+    def airgap(pipette):
+        cur = db.execute('INSERT INTO CommandQueue (Command, Pipette) VALUES ("AirGap",?)',[pipettenames[pipette]])
+    def createOnExecute(action,plateid,platerow,platecol):
+
+        onexecute="INSERT INTO Actions (PlateID,Row,Column,TypeOfOperation,ActionTime) VALUES ("+str(plateid)+","+str(platerow)+","+str(platecol)+",'"+action+"',"+"<time>)";
+   
+        return(onexecute)
+    def getNextMeasurementWell():
+        nonlocal MeasurementAvailableWells
+        nonlocal MeasurementPlate
+        if(len(MeasurementAvailableWells)==0):
+            cur = db.execute('SELECT * FROM Plates WHERE PlatePurpose=2 AND PlateFinished=0')
+            plates=cur.fetchall()
+            for one in plates:
+                MeasurementPlate=one['PlateID']
+                MeasurementAvailableWells=[]
+                for y in range(12):
+                    for x in range(8):
+                        MeasurementAvailableWells.append((x,y))
+                        
+                
+                cur2 = db.execute('SELECT * FROM PlatePositions WHERE PlateID=?',[one['PlateID']])
+                wells=cur2.fetchall()
+                for well in wells:
+
+                    indices = [i for i, tupl in enumerate(MeasurementAvailableWells) if tupl[0] == well['Row'] and  tupl[1] == well['Column']]
+                    MeasurementAvailableWells.pop(indices[0])
+                if len(MeasurementAvailableWells)>0:
+                    break;
+            if len(MeasurementAvailableWells)==0:
+                #flash('No measurement plates available')
+                return(-1,-1,-1)
+           
+
+        
+        (row,col)=MeasurementAvailableWells[0]
+        MeasurementAvailableWells.pop(0)
+        return (MeasurementPlate,row,col)
+
+
+    db = get_db()
+    cur = db.execute('SELECT * FROM CommandQueue WHERE doneAt IS NULL')
+    if(cur.fetchone() != None):
+        flash('Please clear the queue first')
+        return redirect(url_for('view_queue'))
+    cur = db.execute('SELECT PlateRows,PlateCols,PlateClass FROM Plates INNER JOIN PlateClasses ON Plates.PlateClass= PlateClasses.PlateClassID WHERE PlateID= ?',[request.form['plateid']])
+    platestats=cur.fetchone();
+
+    if platestats['PlateClass']==0:
+        cur = db.execute('INSERT INTO CommandQueue (Command, Labware, LabwareType,Slot) VALUES ("InitaliseLabware","CulturePlate","96-flat","B1")')
+        
+        feedVolume=200
+        extraRemoval=5
+        aliquotvol=40
+        resuspvol=150
+    elif platestats['PlateClass']==1:
+        cur = db.execute('INSERT INTO CommandQueue (Command, Labware, LabwareType,Slot) VALUES ("InitaliseLabware","CulturePlate","24-well-plate","B1")')
+        feedVolume=900
+        extraRemoval=15
+        aliquotvol=20
+        resuspvol=800
+    else:
+        raise Exception('Undefined plate class?')
+    cur = db.execute('select * FROM Cultures INNER JOIN PlatePositions ON Cultures.CultureID = PlatePositions.CultureID INNER JOIN Plates ON PlatePositions.PlateID=Plates.PlateID  WHERE Plates.PlateID=? ORDER BY Column, Row',[request.form['plateid']])
+    cultures=cur.fetchall()
+    tipnumber=0
+    
+    if request.form['manual']=="split":
+            print("boo")
+    elif request.form['manual']=="feed":
+        for culture in cultures:
+            getTip(0)
+            cur = aspirate(0,"CulturePlate",feedVolume+extraRemoval,culture['Row'],culture['Column'],plateid=request.form['plateid'])
+           # cur = db.execute('INSERT INTO CommandQueue (Command, Volume, Labware) VALUES ("Dispense",?,"Trash")',[feedVolume+extraRemoval])
+            dropTip(0)
+        getTip(0)
+        for culture in cultures:
+            
+            cur = aspirate(0,"TubMedia",feedVolume)
+            onexec=createOnExecute("feed",request.form['plateid'],culture['Row'],culture['Column'])
+            cur = dispense(0,"CulturePlate",feedVolume,culture['Row'],culture['Column'],onexec,plateid=request.form['plateid'])
+           
+        dropTip(0)
+        cur = db.execute('INSERT INTO CommandQueue (Command) VALUES ("Home")')
+    elif request.form['manual']=="feedandaliquot":
+        cur = db.execute('INSERT INTO CommandQueue (Command, Labware, LabwareType,Slot) VALUES ("InitaliseLabware","AliquotPlate","96-flat","C1")')
+        for culture in cultures:
+            getTip(0)
+            cur = aspirate(0,"CulturePlate",feedVolume+extraRemoval,culture['Row'],culture['Column'],request.form['plateid'])
+            airgap(0)
+            dropTip(0)
+            getTip(0)
+            cur = aspirate(0,"TubMedia",feedVolume)
+
+            cur = dispense(0,"CulturePlate",feedVolume,culture['Row'],culture['Column'],plateid=request.form['plateid'])
+            cur = resuspend(0,"CulturePlate",resuspvol,culture['Row'],culture['Column'],plateid=request.form['plateid'])
+            cur = aspirate(0,"CulturePlate",aliquotvol,culture['Row'],culture['Column'],plateid=request.form['plateid'])
+            (alplate,alrow,alcol)=getNextMeasurementWell();
+            if(alplate==-1):
+                flash("Please add a new measurement plate")
+                return redirect(url_for('show_plates'))
+            onexecute="INSERT INTO PlatePositions (PlateID,Row,Column,CultureID,timeSampled) VALUES ("+str(alplate)+","+str(alrow)+","+str(alcol)+","+str(culture['CultureID'])+","+"<time>)";
+            cur = dispense(0,"AliquotPlate",aliquotvol,alrow,alcol,onexecute,alplate,bottom=True)
+            cur = aspirate(0,"AliquotPlate",100,alrow,alcol,plateid=alplate)
+            cur = dispense(0,"AliquotPlate",100,alrow,alcol,plateid=alplate)
+            airgap(0)
+            dropTip(0);
+        cur = db.execute('INSERT INTO CommandQueue (Command) VALUES ("Home")')
+    elif request.form['manual']=="feedanddiscard30":
+        cur = db.execute('INSERT INTO CommandQueue (Command, Labware, LabwareType,Slot) VALUES ("InitaliseLabware","AliquotPlate","96-flat","C1")')
+        for culture in cultures:
+            getTip(0)
+            cur = aspirate(0,"CulturePlate",feedVolume+extraRemoval,culture['Row'],culture['Column'],plateid=request.form['plateid'])
+            airgap(0)
+            dropTip(0)
+            getTip(0)
+            cur = aspirate(0,"TubMedia",feedVolume)
+            cur = dispense(0,"CulturePlate",feedVolume,culture['Row'],culture['Column'],plateid=request.form['plateid'])
+            cur = resuspend(0,"CulturePlate",resuspvol,culture['Row'],culture['Column'],plateid=request.form['plateid'])
+            cur = aspirate(0,"CulturePlate",300,culture['Row'],culture['Column'],plateid=request.form['plateid'])
+            airgap(0)
+            dropTip(0)
+        getTip(0)
+        vol=0
+        for culture in cultures:
+            if vol==0:
+                cur = aspirate(0,"TubBlood",900)
+                vol=900
+            cur = dispense(0,"CulturePlate",300,culture['Row'],culture['Column'],plateid=request.form['plateid'])
+            vol=vol-300
+           
+        dropTip(0)
+        cur = db.execute('INSERT INTO CommandQueue (Command) VALUES ("Home")')
+
+        
+    elif request.form['manual']=="auto":
+        print("pph")
+    else:
+        raise Exception('Neither manual nor auto chosen')
+    db.commit()
+    return redirect(url_for('view_queue'))
+@app.route('/queue')
+@app.route('/queue/<history>')
+def view_queue(history=0):
+    if int(history)==1:
+       extra="" 
+    else:
+        extra="WHERE queued != -1"
+    db = get_db()
+    cur = db.execute('SELECT * FROM CommandQueue '+extra)
+    cur2 = db.execute('SELECT SUM(Volume) AS totalvolume, Labware FROM CommandQueue WHERE queued != -1 AND Command = "Aspirate" GROUP BY Labware')
+    return render_template('viewQueue.html', queue=cur.fetchall(),vols=cur2.fetchall())
+
+@app.route('/refresh')
+def view_refreshed():
+ 
+    return render_template('raspberrypi.html')
+
+@app.route('/justQueue')
+def justQueue():
+    db = get_db()
+    cur = db.execute('SELECT * FROM CommandQueue WHERE doneAt IS NULL')
+    return render_template('justQueue.html', queue=cur.fetchall())
+
+@app.route('/clearqueue', methods=['POST'])
+def clearqueue():
+    db = get_db()
+    db.execute('DELETE FROM CommandQueue WHERE doneAt IS NULL')
+    db.execute('UPDATE CommandQueue SET queued = -1')
+    db.commit()
+    flash('Queue cleared')
+    return redirect(url_for('view_queue'))
+
+@app.route('/archivePlatePosition', methods=['POST'])
+def archivePlatePosition():
+    db = get_db()
+    db.execute('UPDATE PlatePositions SET Status=10 WHERE  PlateID= ? AND Row = ? AND Column = ?',
+                 [request.form['plateid'],request.form['row'],request.form['col']])
+    db.commit()
+    flash('Culture archived')
+    return redirect(url_for('show_plate',plateID=request.form['plateid']))
+
+@app.route('/pauseQueue', methods=['POST'])
+def pausequeue():
+    db = get_db()
+    cur = db.execute('UPDATE CommandQueue SET queued=0 WHERE queued=1')
+    db.commit()
+    flash('Queue paused')
+    return redirect(url_for('view_refreshed'))
+@app.route('/runQueue', methods=['POST'])
+def runqueue():
+    db = get_db()
+    cur = db.execute('UPDATE CommandQueue SET queued=1 WHERE queued=0')
+    db.commit()
+    flash('Queue started')
+    return redirect(url_for('view_refreshed'))
+    
+    
+
+@app.route('/createMeasurementPlate', methods=['POST'])
+def createMeasurementPlate():
+    db = get_db()
+    cur = db.execute('SELECT * FROM Plates WHERE PlatePurpose=2 ORDER BY PlateID DESC')
+    latest=cur.fetchone()
+    if latest == None:
+        lastnum=0
+    else:
+
+        lastname=latest['PlateName']
+        lastnum =int(re.findall('\d+', lastname)[0])
+    newnum=lastnum+1
+    db.execute('insert into Plates (PlateName,PlateClass,PlateFinished,PlatePurpose) values (?,0,0,2)',
+                 ["MeasurementPlate"+str(newnum)])
+    db.commit()
+    flash('Measurement plate '+ str(newnum)+ ' created')
+    return redirect(url_for('show_plates'))
+    
+    
+    

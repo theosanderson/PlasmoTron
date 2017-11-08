@@ -1,0 +1,100 @@
+
+CREATE TABLE IF NOT EXISTS Cultures
+(
+    CultureID INTEGER PRIMARY KEY,
+    CultureName VARCHAR(100)
+    
+);
+
+CREATE TABLE IF NOT EXISTS Plates
+(
+    PlateID INTEGER PRIMARY KEY,
+    PlateName VARCHAR(50),
+    PlateClass INTEGER,
+    PlatePurpose INTEGER,
+    PlateFinished INTEGER
+
+
+);
+
+CREATE TABLE IF NOT EXISTS PlatePositions
+(
+    PlatePositionID INTEGER PRIMARY KEY,
+    PlateID INT,
+    Row INT,
+    Column INT,
+    CultureID INT,
+    Status INT,
+    timeSampled INT,
+      CONSTRAINT unq UNIQUE (PlateID,Row,Column)
+    
+  
+);
+
+CREATE TABLE IF NOT EXISTS PlateValues
+(
+    PlateValueID INTEGER PRIMARY KEY,
+    PlateID INT,
+    Row INT,
+    Column INT,
+    time INT
+  
+);
+
+CREATE TABLE IF NOT EXISTS Actions
+(
+    ActionID INTEGER PRIMARY KEY,
+    PlateID INT,
+    Row INT,
+    Column INT,
+    TypeOfOperation VARCHAR(20),
+       ActionText VARCHAR(20),
+    ValueOfOperation INT,
+    ActionTime INT
+);
+
+
+CREATE TABLE IF NOT EXISTS PlateClasses
+(
+    PlateClassID INTEGER PRIMARY KEY,
+    PlateRows INTEGER,
+    PlateCols INTEGER
+);
+
+CREATE TABLE IF NOT EXISTS Measurements
+(
+    MeasurementID INTEGER PRIMARY KEY,
+    PlatePositionID INTEGER,
+    MeasurementValue FLOAT,
+    MeasurementType INTEGER,
+    MeasurementTime INTEGER
+
+    
+);
+
+
+CREATE TABLE IF NOT EXISTS CommandQueue
+(
+    CommandID INTEGER PRIMARY KEY,
+    Command VARCHAR(20),
+    Pipette VARCHAR(20),
+    Labware VARCHAR(20),
+    PlateID INTEGER,
+    Row INTEGER,
+    Column INTEGER,
+    Volume INTEGER,
+    queued INTEGER DEFAULT 0,
+    DoneAt INTEGER,
+    OrderOfEvents INTEGER,
+    LabwareType VARCHAR(30),
+    Slot VARCHAR[10],
+    OnCompletion VARCHAR(300)
+
+    
+);
+
+
+
+
+INSERT INTO PlateClasses (PlateClassID,PlateRows,PlateCols) VALUES (0,8,12);
+INSERT INTO PlateClasses (PlateClassID,PlateRows,PlateCols) VALUES (1,4,6);
