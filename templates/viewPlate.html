@@ -27,7 +27,7 @@
   <div id="ref" style="width:50px;height:30px"></div>
   
 </table>
-
+{% if plate.PlatePurpose != 2 %}
     <form action="{{ url_for('process_plate') }}" method=post class=add-entry>
       <h3>Process plate</h3>
       <dl>
@@ -76,5 +76,14 @@
 
 
 </script>
+{% endif %}
+{% if plate.PlatePurpose == 2 %}
+<h3>Supply readings</h3>
+  <form method=post enctype=multipart/form-data action="/uploadReadings">
+      <p><input type=file name=file>
+        <input type=hidden size=30 name=plateID value="{{plate.PlateID}}">
+         <input type=submit value=Upload>
+    </form>
+{% endif %}
 
 {% endblock %}

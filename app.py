@@ -10,10 +10,14 @@ from flask import Flask, request, session, g, redirect, url_for, abort, \
      render_template, flash
 import sys
 
+ALLOWED_EXTENSIONS = set(['csv'])
+
+
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
 app = Flask(__name__) # create the application instance :)
 app.config.from_object(__name__) # load config from this file , flaskr.py
+
 
 # Load default config and override config from an environment variable
 app.config.update(dict(
@@ -26,6 +30,37 @@ app.config.update(dict(
 app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 import string
 numberstoletters = dict(enumerate(string.ascii_uppercase, 1))
+def reverseRowColumn(cell):
+    cell = cell.lower()
+
+    # generate matched object via regex (groups grouped by parentheses)
+    ############################################################################
+    # [a-z] matches a character that is a lower-case letter
+    # [0-9] matches a character that is a number
+    # The + means there must be at least one and repeats for the character it matches
+    # the parentheses group the objects (useful with .group())
+    m = re.match('([a-z]+)([0-9]+)', cell)
+
+    # if m is None, then there was no match
+    if m is None:
+        # let's tell the user that there was no match because it was an invalid cell
+        from sys import stderr
+        print('Invalid cell: {}'.format(cell), file=stderr)
+        return(None)
+    else:
+        # we have a valid cell!
+        # let's grab the row and column from it
+
+        var1 = 0
+
+        # run through all of the characters in m.group(1) (the letter part)
+        for ch in m.group(1):
+            # ord('a') == 97, so ord(ch) - 96 == 1
+            var1 += ord(ch) - 96
+        var2 = int(m.group(2))
+        row=var2-1
+        col=var1-1
+        return((row,col))
 def formatRowColumn(Row,Column):
     if Row == None :
         newrow=""
@@ -88,6 +123,7 @@ def show_plate(plateID):
     entries = cur.fetchall()
     dimx=plate['PlateRows']
     dimy=plate['PlateCols']
+    
     rows = [[{"name":"", "id": -1} for i in range(dimy)] for j in range(dimx)]
     for entry in entries:
         rows[entry['Row']][entry['Column']]=entry
@@ -97,14 +133,15 @@ def show_plate(plateID):
 def show_culture(cultureID):
     db = get_db()
 
-    cur = db.execute('select * FROM Cultures INNER JOIN PlatePositions ON Cultures.CultureID = PlatePositions.CultureID INNER JOIN Plates ON PlatePositions.PlateID=Plates.PlateID  WHERE Cultures.CultureID= ?',[cultureID])
+    cur = db.execute('select * FROM Cultures INNER JOIN PlatePositions ON Cultures.CultureID = PlatePositions.CultureID INNER JOIN Plates ON PlatePositions.PlateID=Plates.PlateID  WHERE Plates.PlatePurpose=1 AND Cultures.CultureID= ?',[cultureID])
     culture = cur.fetchone()
     cur = db.execute('select * FROM CommandQueue WHERE PlateID = ? AND Row = ? AND Column = ?',[culture['PlateID'], culture['Row'], culture['Column']])
     history = cur.fetchall()
     cur = db.execute('select * FROM Actions WHERE PlateID = ? AND Row = ? AND Column = ?',[culture['PlateID'], culture['Row'], culture['Column']])
     actions = cur.fetchall()
-    
-    return render_template('viewCulture.html', culture=culture,history=history,actions=actions)
+    cur = db.execute('select * FROM Cultures INNER JOIN PlatePositions ON Cultures.CultureID = PlatePositions.CultureID INNER JOIN Plates ON PlatePositions.PlateID=Plates.PlateID INNER JOIN Measurements ON Measurements.PlateID=Plates.PlateID AND Measurements.Row=PlatePositions.Row AND Measurements.Column=PlatePositions.Column  WHERE Plates.PlatePurpose=2 AND Cultures.CultureID= ?',[cultureID])
+    measurements=cur.fetchall();
+    return render_template('viewCulture.html', culture=culture,history=history,actions=actions,measurements=measurements)
 
 
 
@@ -138,7 +175,7 @@ def add_culture():
     if currentRow >= platestats['PlateRows'] or currentCol >= platestats['PlateCols']:
         flash('Culture was attempted to be created outside bounds of plate')
         return redirect(url_for('show_plate',plateID=request.form['plateID']))
-    print("Hello world!", file=sys.stderr)
+    
     db.execute('insert into Cultures (CultureName) values (?)',
                  [request.form['title']])
     db.execute('insert into PlatePositions (CultureID,PlateID,Row,Column) values (last_insert_rowid(),?,?,?)',
@@ -416,6 +453,47 @@ def createMeasurementPlate():
     db.commit()
     flash('Measurement plate '+ str(newnum)+ ' created')
     return redirect(url_for('show_plates'))
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+@app.route('/uploadReadings', methods=['POST'])
+def uploadReadings():
+    db = get_db()
+    if request.method == 'POST':
+        # check if the post request has the file part
+        if 'file' not in request.files:
+            flash('No file part')
+            return redirect(url_for('show_plate',plateID=request.form['plateID']))
+        file = request.files['file']
+        # if user does not select file, browser also
+        # submit a empty part without filename
+        if file.filename == '':
+            flash('No selected file')
+            return redirect(url_for('show_plate',plateID=request.form['plateID']))
+        if file and allowed_file(file.filename):
+            measurements=0;
+            text=file.read()
+            for l in text.splitlines():
+                mylist = str(l).split(',')
+                name=mylist[0]
+                mylist2 = name.split('-')
+                location = mylist2[len(mylist2)-1]
+                if len(mylist)>5 and len(mylist2)>2:
+                    percent=mylist[10]
+
+                    if percent !="":
+                        percent=float(re.findall(r"[-+]?\d*\.\d+|\d+", percent)[0])
+                        (row,col)=reverseRowColumn(location)
+
+                        eprint("Location"+str(row)+","+str(col)+","+str(percent))
+                        db.execute('insert into Measurements (PlateID,Row,Column,MeasurementValue) values (?,?,?,?)',  [request.form['plateID'],row,col,percent])
+                        measurements=measurements+1
+            db.execute('UPDATE Plates SET PlateFinished=1 WHERE PlateID=?',  [request.form['plateID']])
+            db.commit()
+            flash(str(measurements)+ " measurements added.")
+
+    
+    return redirect(url_for('show_plate',plateID=request.form['plateID']))
     
     
     

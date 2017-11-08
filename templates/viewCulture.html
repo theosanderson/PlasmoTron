@@ -26,8 +26,13 @@
   {% for item in history %}
   <li>{{item.Command}} - {%if item.doneAt is not none %} {{displayTime(item.doneAt)}} {% endif %}</li>
       {% endfor %}
-    
-  
+    </ul>
+<h3>Measurements</h3>
+  <ul>
+  {% for item in measurements %}
+  <li>{{item.MeasurementValue}} - {{displayTime(item.timeSampled)}} </li>
+      {% endfor %}
+      
   
 </ul>
 

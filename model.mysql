@@ -64,10 +64,13 @@ CREATE TABLE IF NOT EXISTS PlateClasses
 CREATE TABLE IF NOT EXISTS Measurements
 (
     MeasurementID INTEGER PRIMARY KEY,
-    PlatePositionID INTEGER,
+    PlateID INTEGER,
+    Row INTEGER,
+    Column INTEGER,
     MeasurementValue FLOAT,
     MeasurementType INTEGER,
-    MeasurementTime INTEGER
+    MeasurementTime INTEGER,
+     CONSTRAINT unq UNIQUE (PlateID,Row,Column)
 
     
 );
