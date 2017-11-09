@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% block body %}
  
-    <form action="{{ url_for('add_plate') }}" method=post class=add-entry>
+    <form action="{{ url_for('add_plate') }}" method=post class=add-entry  style="margin-top:10px">
       <dl>
         <dt>Plate name:
         <dd><input type=text size=30 name=title>
@@ -11,6 +11,11 @@
        <input type="submit" value="Create new culture plate">
     </form>
 
+<form action="{{ url_for('createMeasurementPlate') }}" method=post class=add-entry style="margin-top:10px">
+      <input type="submit" value="Create new measurement plate">
+    </form>
+
+
   <ul class=entries>
   {% for entry in entries %}
     <li><a href="/plate/{{ entry.PlateID }}"><h2>{{ entry.PlateName }}</h2></a>{{ entry.count }} wells 
@@ -19,7 +24,5 @@
   {% endfor %}
   </ul>
 
-    <form action="{{ url_for('createMeasurementPlate') }}" method=post class=add-entry>
-      <input type="submit" value="Create new measurement plate">
-    </form>
+    
 {% endblock %}

@@ -1,11 +1,15 @@
 from opentrons import robot, containers, instruments
+import sys
 import sqlite3
 import time
 import string
 dbd = sqlite3.connect('flaskr.db', timeout=100000)
 equipment = {}
-robot.connect(robot.get_serial_ports_list()[0])
-#robot.connect()
+mode=sys.argv[1]
+if mode=="simulate":
+	robot.connect()
+else:
+	robot.connect(robot.get_serial_ports_list()[0])
 if not robot.is_connected():
 	raise Exception('Did not connect') 
 

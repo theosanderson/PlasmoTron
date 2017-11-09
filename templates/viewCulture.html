@@ -36,9 +36,17 @@
   
 </ul>
 
+{% if culture.Status!=10 %}
 <form action="{{url_for('archivePlatePosition')}}" method="post">
   <input type=hidden size=30 name=row value="{{culture.Row}}"><input type=hidden size=30 name=col value="{{culture.Column}}"><input type=hidden size=30 name=plateid value="{{culture.PlateID}}"><input type="submit" value="Archive this location" />
   </form>
-
-
+{% endif %}
+{% if culture.Status==10 %}
+<form action="{{url_for('unarchivePlatePosition')}}" method="post">
+  <input type=hidden size=30 name=row value="{{culture.Row}}"><input type=hidden size=30 name=col value="{{culture.Column}}"><input type=hidden size=30 name=plateid value="{{culture.PlateID}}"><input type="submit" value="Unarchive this location" />
+  </form>
+{% endif %}
+<form action="{{url_for('deletePlatePosition')}}" method="post">
+  <input type=hidden size=30 name=row value="{{culture.Row}}"><input type=hidden size=30 name=col value="{{culture.Column}}"><input type=hidden size=30 name=plateid value="{{culture.PlateID}}"><input type="submit" value="Delete this location" />
+  </form>
 {% endblock %}

@@ -58,8 +58,8 @@ def reverseRowColumn(cell):
             # ord('a') == 97, so ord(ch) - 96 == 1
             var1 += ord(ch) - 96
         var2 = int(m.group(2))
-        row=var2-1
-        col=var1-1
+        row=var1-1
+        col=var2-1
         return((row,col))
 def formatRowColumn(Row,Column):
     if Row == None :
@@ -300,7 +300,7 @@ def process_plate():
         resuspvol=800
     else:
         raise Exception('Undefined plate class?')
-    cur = db.execute('select * FROM Cultures INNER JOIN PlatePositions ON Cultures.CultureID = PlatePositions.CultureID INNER JOIN Plates ON PlatePositions.PlateID=Plates.PlateID  WHERE Plates.PlateID=? ORDER BY Column, Row',[request.form['plateid']])
+    cur = db.execute('select * FROM Cultures INNER JOIN PlatePositions ON Cultures.CultureID = PlatePositions.CultureID INNER JOIN Plates ON PlatePositions.PlateID=Plates.PlateID  WHERE Plates.PlateID=? AND (PlatePositions.Status IS NULL OR PlatePositions.Status != 10) ORDER BY Column, Row',[request.form['plateid']])
     cultures=cur.fetchall()
     tipnumber=0
     
@@ -417,6 +417,22 @@ def archivePlatePosition():
                  [request.form['plateid'],request.form['row'],request.form['col']])
     db.commit()
     flash('Culture archived')
+    return redirect(url_for('show_plate',plateID=request.form['plateid']))
+@app.route('/unarchivePlatePosition', methods=['POST'])
+def unarchivePlatePosition():
+    db = get_db()
+    db.execute('UPDATE PlatePositions SET Status=0 WHERE  PlateID= ? AND Row = ? AND Column = ?',
+                 [request.form['plateid'],request.form['row'],request.form['col']])
+    db.commit()
+    flash('Culture archived')
+    return redirect(url_for('show_plate',plateID=request.form['plateid']))
+@app.route('/deletePlatePosition', methods=['POST'])
+def deletePlatePosition():
+    db = get_db()
+    db.execute('DELETE FROM PlatePositions WHERE  PlateID= ? AND Row = ? AND Column = ?',
+                 [request.form['plateid'],request.form['row'],request.form['col']])
+    db.commit()
+    flash('Plate position deleted')
     return redirect(url_for('show_plate',plateID=request.form['plateid']))
 
 @app.route('/pauseQueue', methods=['POST'])

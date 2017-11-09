@@ -1,4 +1,21 @@
- <ul>
+ {% if queue|length>0  and queue[0].queued ==1  %}
+<div class="robotwarn">
+<img src="/static/HR002.png" height=30>Caution. Robot in use.</div>
+ {% endif %}
+<h3>Operations</h3>
+<form action="{{ url_for('clearqueue') }}" method=post class=add-entry>
+        <input type="submit" value="Clear queue">
+ </form>
+    <form action="{{ url_for('pausequeue') }}" method=post class=add-entry>
+        <input type="submit" value="Pause queue">
+
+    </form>
+    <form action="{{ url_for('runqueue') }}" method=post class=add-entry>
+
+        <input type="submit" value="Run queue">
+
+    </form>
+     <ul>
   {% for item in queue %}
   <li {% if item.doneAt is not none %}class="done"{% endif %} {% if item.queued == 1  %}class="inqueue"{% endif %} {% if loop.index == 1 %}
        id="first"
