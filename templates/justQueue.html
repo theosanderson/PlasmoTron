@@ -2,6 +2,14 @@
 <div class="robotwarn">
 <img src="/static/HR002.png" height=30>Caution. Robot in use.</div>
  {% endif %}
+ <div style="float:right">
+  <h3>Queue runner</h3>
+<p>{{status}}</p>
+<form action="/killQueueProcessor" method="post" >
+<input type=submit value="Kill"></form>
+<form action="/restartQueueProcessor" method="post">
+<input type=submit  value="Restart"></form>
+ </div>
 <h3>Operations</h3>
 <form action="{{ url_for('clearqueue') }}" method=post class=add-entry>
         <input type="submit" value="Clear queue">
@@ -22,6 +30,6 @@
     {% endif %}>{{item.Command}}  {% if item.Volume is not none %} {{item.Volume}} &mu;l  {% endif %} in {{item.Labware}} {{ formatRowColumn(item.Row,item.Column)}}</li>
       {% endfor %}
     
-  
+
   
 </ul>

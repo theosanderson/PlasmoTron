@@ -6,18 +6,19 @@ import time
 import sys
 import datetime
 import re
+import subprocess
 from flask import Flask, request, session, g, redirect, url_for, abort, \
      render_template, flash
 import sys
+import atexit
 
 ALLOWED_EXTENSIONS = set(['csv'])
-
 
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
 app = Flask(__name__) # create the application instance :)
 app.config.from_object(__name__) # load config from this file , flaskr.py
-
+queueProcessor="beginning";
 
 # Load default config and override config from an environment variable
 app.config.update(dict(
@@ -399,7 +400,15 @@ def view_refreshed():
 def justQueue():
     db = get_db()
     cur = db.execute('SELECT * FROM CommandQueue WHERE doneAt IS NULL')
-    return render_template('justQueue.html', queue=cur.fetchall())
+    if queueProcessor == "beginning":
+        result="notstarted"
+    else:
+        poll=queueProcessor.poll()
+        if poll ==None:
+            result="running"
+        else:
+            result="crashed"
+    return render_template('justQueue.html', queue=cur.fetchall(),status=result)
 
 @app.route('/clearqueue', methods=['POST'])
 def clearqueue():
@@ -510,6 +519,36 @@ def uploadReadings():
 
     
     return redirect(url_for('show_plate',plateID=request.form['plateID']))
+
+
+@app.route('/killQueueProcessor', methods=['POST'])
+def killQueueProcessor():
+    global queueProcessor
+    if queueProcessor !="beginning":
+        pid = queueProcessor.pid
+        queueProcessor.terminate()
+
+    # Check if the process has really terminated & force kill if not.
+        try:
+          os.kill(pid, 0)
+          queueProcessor.kill()
+          flash("Forced kill")
+        except OSError as e:
+           flash("Terminated gracefully")
+
+    return redirect(url_for('show_plates'))
+    
+
+@app.route('/restartQueueProcessor', methods=['POST'])
+def restartQueueProcessor():
+    global queueProcessor
+    killQueueProcessor()
+    queueProcessor=subprocess.Popen(['python', 'queueprocessor.py'])
+    flash("And started")
+    return redirect(url_for('show_plates'))
     
     
-    
+def cleanup():
+    killQueueProcessor()
+
+atexit.register(cleanup)   

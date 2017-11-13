@@ -5,8 +5,7 @@ import time
 import string
 dbd = sqlite3.connect('flaskr.db', timeout=100000)
 equipment = {}
-mode=sys.argv[1]
-if mode=="simulate":
+if len(sys.argv)>1 and sys.argv[1]=="simulate":
 	robot.connect()
 else:
 	robot.connect(robot.get_serial_ports_list()[0])
@@ -59,7 +58,7 @@ while 1:
 	if(command == None):
 
 		time.sleep(0.1)
-		print("none")
+		#print("none")
 	else:
 		if command['Command']=="Home":
 			robot.home()
@@ -71,7 +70,7 @@ while 1:
 
 			equipment[command['Pipette']].aspirate(command['Volume'],location)
 		if command['Command']=="AirGap":
-			print("gap")
+			#print("gap")
 			try:
 				equipment[command['Pipette']].air_gap(20)
 			except:
@@ -132,13 +131,13 @@ while 1:
 					torun=command['OnCompletion']
 
 					torun=torun.replace( "<time>", str(timestamp))
-					print(torun)
+					#print(torun)
 					db.execute(torun)
 					dbd.commit()
 				break;
 			except sqlite3.OperationalError as err:
 				print("database locked? "+ str(err))
-				time.sleep(0.1)
+				time.sleep(0.5)
 		dbd.commit()
 		#time.sleep(3)
 
