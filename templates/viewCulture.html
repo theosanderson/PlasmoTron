@@ -1,16 +1,16 @@
 {% extends "layout.html" %}
 {% block body %}
  <h2>Culture: {{ culture.CultureName }} <small>| <a href="{{ url_for('show_plate',plateID=culture.PlateID) }}"> {{culture.PlateName}}</a>: {{ formatRowColumn(culture.Row,culture.Column)}}</small></h2>
+<h3>Parasitaemias</h3>
+  <ul>
+  {% for item in measurements %}
+  <li>{{item.MeasurementValue}}% - {{displayTime(item.timeSampled)}} </li>
+      {% endfor %}
+      
+  
+</ul>
+    
 
-    <form action="{{ url_for('add_manual_action') }}" method=post class=add-entry>
-      <h3>Manually add an action</h3>
-      <dl>
-        <dt>Custom action:
-        <dd><input type=text size=30 name=text><input type=hidden size=30 name=row value="{{culture.Row}}"><input type=hidden size=30 name=col value="{{culture.Column}}"><input type=hidden size=30 name=plateid value="{{culture.PlateID}}"><input type=hidden size=30 name=cultureid value="{{culture.CultureID}}">
-   
-      </dl>
-    </form>
-<h1></h1>
   <h3>Action history</h3>
   <ul>
   {% for item in actions %}
@@ -27,14 +27,7 @@
   <li>{{item.Command}} - {%if item.doneAt is not none %} {{displayTime(item.doneAt)}} {% endif %}</li>
       {% endfor %}
     </ul>
-<h3>Measurements</h3>
-  <ul>
-  {% for item in measurements %}
-  <li>{{item.MeasurementValue}} - {{displayTime(item.timeSampled)}} </li>
-      {% endfor %}
-      
-  
-</ul>
+
 
 {% if culture.Status!=10 %}
 <form action="{{url_for('archivePlatePosition')}}" method="post">
@@ -49,4 +42,12 @@
 <form action="{{url_for('deletePlatePosition')}}" method="post">
   <input type=hidden size=30 name=row value="{{culture.Row}}"><input type=hidden size=30 name=col value="{{culture.Column}}"><input type=hidden size=30 name=plateid value="{{culture.PlateID}}"><input type="submit" value="Delete this location" />
   </form>
+  <form action="{{ url_for('add_manual_action') }}" method=post class=add-entry>
+      <h3>Manually add an action</h3>
+      <dl>
+        <dt>Custom action:
+        <dd><input type=text size=30 name=text><input type=hidden size=30 name=row value="{{culture.Row}}"><input type=hidden size=30 name=col value="{{culture.Column}}"><input type=hidden size=30 name=plateid value="{{culture.PlateID}}"><input type=hidden size=30 name=cultureid value="{{culture.CultureID}}">
+   
+      </dl>
+    </form>
 {% endblock %}

@@ -44,3 +44,6 @@ li.inqueue{color:green;}
 li.done{color:gray;}
 
 li#first{font-size:200%; color:black; font-weight:bold;}
+
+input,select {font-size:120%;}
+button{font-size:200%;}
