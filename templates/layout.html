@@ -2,9 +2,12 @@
 <title>PlasmoTRON</title>
 <link href="https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300,300i,700|Open+Sans:300,300i,400,400i,600,600i,700&amp;subset=greek" rel="stylesheet">
 <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
-<link rel="stylesheet" href="/static/jquery.numpad.css">
+<link rel=stylesheet type=text/css href="{{ url_for('static', filename='metricsgraphics.css') }}">
 
+<link rel="stylesheet" href="/static/jquery.numpad.css">
+<script src="{{ url_for('static', filename='d3.v4.min.js') }}"></script>
 <script src="{{ url_for('static', filename='jquery-3.2.1.min.js') }}"></script>
+<script src="{{ url_for('static', filename='metricsgraphics.min.js') }}"></script>
 <script type="text/javascript" src="/static/jquery.numpad.js"></script>
 <div class=page>
 	<div class="rightmenu">

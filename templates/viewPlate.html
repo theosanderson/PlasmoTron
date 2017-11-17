@@ -35,7 +35,7 @@
         <dd><input type=hidden size=30 name=plateid value="{{plate.PlateID}}"><select name="manual"><option value="auto">Automatic</option><option value="feed">Feed</option><option value="split">Split</option><option value="feedandaliquot">Feed and aliquot</option><option value="feedanddiscard30">Feed and discard 30</option></select><input type="submit" value="Plan plate processing" /></dd>
 
         Rows used (P200): <input name="tips200"  id="tip200" value="0"/>
-
+<br>
         Tips used (P1000):<input name="tips1000" id="tip1000" value="0"/>
       <script>  
             $.fn.numpad.defaults.gridTpl = '<table class="table modal-content"></table>';
@@ -83,6 +83,11 @@
       <p><input type=file name=file>
         <input type=hidden size=30 name=plateID value="{{plate.PlateID}}">
          <input type=submit value=Upload>
+    </form>
+    <form method=post  action="/clearReadings">
+      <p>
+        <input type=hidden size=30 name=plateID value="{{plate.PlateID}}">
+         <input type=submit value="Clear readings">
     </form>
 {% endif %}
 

@@ -62,6 +62,9 @@ while 1:
 	else:
 		if command['Command']=="Home":
 			robot.home()
+		if command['Command']=="ResuspendReservoir":
+			robot.home()
+			#toadd
 		if command['Command']=="Aspirate":
 			if command['Row'] is not None:
 				location=equipment[command['Labware']].cols(int(command['Row'])).wells(int(command['Column']))

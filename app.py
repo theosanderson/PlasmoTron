@@ -332,7 +332,7 @@ def process_plate():
             getTip(0)
             cur = aspirate(0,"TubMedia",feedVolume)
 
-            cur = dispense(0,"CulturePlate",feedVolume,culture['Row'],culture['Column'],plateid=request.form['plateid'])
+            cur = dispense(0,"CulturePlate",feedVolume,culture['Row'],culture['Column'],plateid=request.form['plateid'],bottom=True)
             cur = resuspend(0,"CulturePlate",resuspvol,culture['Row'],culture['Column'],plateid=request.form['plateid'])
             cur = aspirate(0,"CulturePlate",aliquotvol,culture['Row'],culture['Column'],plateid=request.form['plateid'])
             (alplate,alrow,alcol)=getNextMeasurementWell();
@@ -355,7 +355,7 @@ def process_plate():
             dropTip(0)
             getTip(0)
             cur = aspirate(0,"TubMedia",feedVolume)
-            cur = dispense(0,"CulturePlate",feedVolume,culture['Row'],culture['Column'],plateid=request.form['plateid'])
+            cur = dispense(0,"CulturePlate",feedVolume,culture['Row'],culture['Column'],plateid=request.form['plateid'],bottom=True)
             cur = resuspend(0,"CulturePlate",resuspvol,culture['Row'],culture['Column'],plateid=request.form['plateid'])
             cur = aspirate(0,"CulturePlate",300,culture['Row'],culture['Column'],plateid=request.form['plateid'])
             airgap(0)
@@ -504,14 +504,14 @@ def uploadReadings():
                 mylist2 = name.split('-')
                 location = mylist2[len(mylist2)-1]
                 if len(mylist)>5 and len(mylist2)>2:
-                    percent=mylist[10]
+                    percent=mylist[7]
 
                     if percent !="":
                         percent=float(re.findall(r"[-+]?\d*\.\d+|\d+", percent)[0])
                         (row,col)=reverseRowColumn(location)
 
                         eprint("Location"+str(row)+","+str(col)+","+str(percent))
-                        db.execute('insert into Measurements (PlateID,Row,Column,MeasurementValue) values (?,?,?,?)',  [request.form['plateID'],row,col,percent])
+                        db.execute('INSERT INTO Measurements (PlateID,Row,Column,MeasurementValue) values (?,?,?,?)',  [request.form['plateID'],row,col,percent])
                         measurements=measurements+1
             db.execute('UPDATE Plates SET PlateFinished=1 WHERE PlateID=?',  [request.form['plateID']])
             db.commit()
@@ -520,7 +520,14 @@ def uploadReadings():
     
     return redirect(url_for('show_plate',plateID=request.form['plateID']))
 
-
+@app.route('/clearReadings', methods=['POST'])
+def clearReadings():
+    db = get_db()
+    cursor=db.execute('DELETE FROM Measurements WHERE PlateID = ?',  [request.form['plateID']])
+    result = cursor.rowcount
+    flash("Deleted "+str(result)+ " measurements")
+    db.commit()
+    return redirect(url_for('show_plate',plateID=request.form['plateID']))
 @app.route('/killQueueProcessor', methods=['POST'])
 def killQueueProcessor():
     global queueProcessor
