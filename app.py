@@ -11,6 +11,7 @@ from flask import Flask, request, session, g, redirect, url_for, abort, \
      render_template, flash
 import sys
 import atexit
+from operator import itemgetter
 
 ALLOWED_EXTENSIONS = set(['csv'])
 
@@ -331,8 +332,8 @@ def process_plate():
             dropTip(0)
             getTip(0)
             cur = aspirate(0,"TubMedia",feedVolume)
-
-            cur = dispense(0,"CulturePlate",feedVolume,culture['Row'],culture['Column'],plateid=request.form['plateid'],bottom=True)
+            onexec=createOnExecute("feed",request.form['plateid'],culture['Row'],culture['Column'])
+            cur = dispense(0,"CulturePlate",feedVolume,culture['Row'],culture['Column'],onexec,plateid=request.form['plateid'],bottom=True)
             cur = resuspend(0,"CulturePlate",resuspvol,culture['Row'],culture['Column'],plateid=request.form['plateid'])
             cur = aspirate(0,"CulturePlate",aliquotvol,culture['Row'],culture['Column'],plateid=request.form['plateid'])
             (alplate,alrow,alcol)=getNextMeasurementWell();
@@ -378,7 +379,7 @@ def process_plate():
     else:
         raise Exception('Neither manual nor auto chosen')
     db.commit()
-    return redirect(url_for('view_queue'))
+    return redirect(url_for('view_refreshed'))
 @app.route('/queue')
 @app.route('/queue/<history>')
 def view_queue(history=0):
@@ -557,5 +558,28 @@ def restartQueueProcessor():
     
 def cleanup():
     killQueueProcessor()
+
+@app.route('/calcparasitaemia')
+def calcpar():
+    db = get_db()
+    cur = db.execute('SELECT * FROM Cultures INNER JOIN PlatePositions ON Cultures.CultureID = PlatePositions.CultureID INNER JOIN Plates ON Plates.PlateID=PlatePositions.PlateID AND Plates.PlatePurpose=1 INNER JOIN ( SELECT MAX(timeSampled),* FROM Measurements INNER JOIN PlatePositions ON PlatePositions.Row=Measurements.Row AND PlatePositions.Column=Measurements.Column AND PlatePositions.PlateID = Measurements.PlateID GROUP BY CultureID ) latestparasitaemia ON Cultures.CultureID=latestparasitaemia.CultureID')
+    entries = cur.fetchall()
+    newlist=[];
+    for entry in entries:
+       d = dict(zip(entry.keys(), entry))  
+       timemeasured=d['timeSampled']
+       timenow=time.time()
+    
+       if timemeasured is not None:
+           timediff=timenow-timemeasured;
+           timediffhours=timediff/(60*60)
+           timediffcycles=timediffhours/27.5
+           growthpercycle=3.5
+           expectednow=d['MeasurementValue']* (growthpercycle**timediffcycles)
+           d['expectednow']=expectednow
+           d['timediffhours']=timediffhours
+           newlist.append(d)
+    newlist = sorted(newlist, key=itemgetter('expectednow'), reverse=True)
+    return render_template('calcParasitaemia.html',newlist=newlist);
 
 atexit.register(cleanup)   

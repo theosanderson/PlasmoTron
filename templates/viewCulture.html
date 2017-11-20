@@ -10,7 +10,7 @@
   
 </ul>
 
-<div class="result" style="width:400px; height:200px; margin:0 auto;">
+<div class="result" style="width:100% height:200px; margin:0 auto;">
 </div>
 <script>
 data=[{% for item in measurements %}{date:new Date({{item.timeSampled * 1000}}),parasitaemia:{{item.MeasurementValue}}}{{ "," if not loop.last }}{% endfor %}];
@@ -23,7 +23,7 @@ MG.data_graphic({
  
   
   data: data,
-  width: 400,
+  full_width:true,
   height: 200,
   target: ".result",
   x_accessor: "date",
