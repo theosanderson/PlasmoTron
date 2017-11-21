@@ -32,11 +32,12 @@
       <h3>Process plate</h3>
       <dl>
         <dt>Custom action:
-      <input type=hidden size=30 name=plateid value="{{plate.PlateID}}"><select name="manual"><option value="auto">Automatic</option><option value="feed">Feed</option><option value="split">Split</option><option value="feedandaliquot">Feed and aliquot</option><option value="feedanddiscard30">Feed and discard 30</option></select><br>
+      <input type=hidden size=30 name=plateid value="{{plate.PlateID}}"><select name="manual"><option value="auto">Automatic</option><option value="feed">Feed</option><option value="split">Split</option><option value="feedandaliquot">Feed and aliquot</option><option value="feedanddiscard30">Feed and discard 30</option><option value="dispense-sybr-green">Dispense Sybr green</option></select><br>
 
         Rows used (P200): <input name="tips200"  id="tip200" value="0"/>
 <br>
         Tips used (P1000):<input name="tips1000" id="tip1000" value="0"/>
+           Max parasitaemia:<input name="parasitaemia" id="parasitaemia" value="0"/>
       <script>  
             $.fn.numpad.defaults.gridTpl = '<table class="table modal-content"></table>';
       $.fn.numpad.defaults.backgroundTpl = '<div class="backdrop"></div>';
@@ -46,6 +47,7 @@
       $.fn.numpad.defaults.onKeypadCreate = function(){$(this).find('.done').addClass('btn-primary');};
       
   $('#tip1000').numpad();
+  $('#parasitaemia').numpad();
 </script>
 <br/>
 <input type="submit" value="Plan plate processing" /></dd>

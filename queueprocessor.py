@@ -23,6 +23,7 @@ equipment['CulturePlate']  = containers.load('24corning', 'B2', 'CulturePlate24'
 equipment['AliquotPlate']  = containers.load('96-flat', 'C2', 'AliquotPlate')
 equipment['TubBlood']=containers.load('epmotion30', "D1","TubBlood")
 equipment['TubMedia']=containers.load('epmotion30', "D1","TubMedia")
+equipment['TubSybr']=containers.load('epmotion30', "D1","TubSybr")
 #robot.head_speed(4500)
 equipment['p1000'] = instruments.Pipette(
     name="P1000",

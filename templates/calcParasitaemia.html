@@ -3,7 +3,7 @@
 <h2>Anticipated parasitaemias</h2>
 <table>
  {% for item in newlist %}<tr><td>
- {{item.PlateName}}</td><td><a href="/culture/{{item.CultureID}}">{{item.CultureName}}</a></td><td>{{item.expectednow | round(2) }}%</td><td> <small>(based on measurements {{item.timediffhours | round(0) |int}} hours ago)</small></td></tr>
+{{item.PlateName}}</td><td><a href="/culture/{{item.CultureID}}">{{item.CultureName}}</a></td><td>{{item.expectednow | round(2) }}%</td><td> <small>(based on measurements {{item.timediffhours | round(0) |int}} hours ago)</small></td></tr>
  {% endfor %}
  </table>
 

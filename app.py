@@ -112,7 +112,7 @@ def initdb_command():
 @app.route('/')
 def show_plates():
     db = get_db()
-    cur = db.execute('select Plates.PlateID, Plates.PlateName, COUNT(PlatePositions.Row) AS count, PlatePurpose, PlateFinished from Plates LEFT JOIN PlatePositions ON PlatePositions.PlateID=Plates.PlateID GROUP BY Plates.PlateID order by Plates.PlateID desc')
+    cur = db.execute('select Plates.PlateID, Plates.PlateName, COUNT(PlatePositions.Row) AS count, PlatePurpose, PlateFinished from Plates LEFT JOIN PlatePositions ON PlatePositions.PlateID=Plates.PlateID GROUP BY Plates.PlateID order by Plates.PlatePurpose, Plates.PlateID DESC')
     entries = cur.fetchall()
     return render_template('showPlates.html', entries=entries)
 
@@ -294,12 +294,14 @@ def process_plate():
         extraRemoval=5
         aliquotvol=40
         resuspvol=150
+        
     elif platestats['PlateClass']==1:
         cur = db.execute('INSERT INTO CommandQueue (Command, Labware, LabwareType,Slot) VALUES ("InitaliseLabware","CulturePlate","24-well-plate","B1")')
         feedVolume=900
         extraRemoval=15
         aliquotvol=20
         resuspvol=800
+        fullVolume=1000
     else:
         raise Exception('Undefined plate class?')
     cur = db.execute('select * FROM Cultures INNER JOIN PlatePositions ON Cultures.CultureID = PlatePositions.CultureID INNER JOIN Plates ON PlatePositions.PlateID=Plates.PlateID  WHERE Plates.PlateID=? AND (PlatePositions.Status IS NULL OR PlatePositions.Status != 10) ORDER BY Column, Row',[request.form['plateid']])
@@ -307,7 +309,44 @@ def process_plate():
     tipnumber=0
     
     if request.form['manual']=="split":
-            print("boo")
+            cur = db.execute('SELECT * FROM Cultures INNER JOIN PlatePositions ON Cultures.CultureID = PlatePositions.CultureID INNER JOIN Plates ON Plates.PlateID=PlatePositions.PlateID AND Plates.PlatePurpose=1 INNER JOIN ( SELECT MAX(timeSampled),* FROM Measurements INNER JOIN PlatePositions ON PlatePositions.Row=Measurements.Row AND PlatePositions.Column=Measurements.Column AND PlatePositions.PlateID = Measurements.PlateID GROUP BY CultureID ) latestparasitaemia ON Cultures.CultureID=latestparasitaemia.CultureID WHERE PlatePositions.PlateID = ?',[request.form['plateid']])
+            splitcultures=cur.fetchall();
+            splitcultures=calcExpectedParasitaemas(splitcultures)
+            desiredParasitaemia=float(request.form['parasitaemia'])
+            if not (desiredParasitaemia >0 and desiredParasitaemia <101):
+            	return ("Error, enter reasonable parasitaemia")
+            addback=[]
+            for culture in splitcultures:
+                if culture['expectednow'] > desiredParasitaemia:
+                    factor=desiredParasitaemia/culture['expectednow']
+                    amountToRemove=(1-factor)*fullVolume
+                    getTip(0)
+                    cur = resuspend(0,"CulturePlate",resuspvol,culture['Row'],culture['Column'],plateid=request.form['plateid'])
+                    cur = aspirate(0,"CulturePlate",amountToRemove,culture['Row'],culture['Column'],plateid=request.form['plateid'])
+                    airgap(0)
+                    dropTip(0)
+                    addback.append([amountToRemove,culture['Row'],culture['Column'],request.form['plateid']])
+            getTip(0)
+            for item in addback:
+                cur = aspirate(0,"TubMedia",item[0])
+                onexec=createOnExecute("split",request.form['plateid'],culture['Row'],culture['Column'])
+                cur = dispense(0,"CulturePlate",item[0],item[1],item[2],onexec,plateid=item[3])
+            dropTip(0)
+
+
+
+    elif request.form['manual']=="dispense-sybr-green":
+    	getTip(0)
+    	curvol=0;
+    	for x in range(8):
+    		for y in range(6):
+    			if curvol<200:
+    				cur = aspirate(0,"TubSybr",1000)
+    				curvol=1000;
+    			cur = dispense(0,"AliquotPlate",200,x,y);
+    			curvol=curvol-200;
+    	dropTip(0)
+
     elif request.form['manual']=="feed":
         for culture in cultures:
             getTip(0)
@@ -343,7 +382,7 @@ def process_plate():
             onexecute="INSERT INTO PlatePositions (PlateID,Row,Column,CultureID,timeSampled) VALUES ("+str(alplate)+","+str(alrow)+","+str(alcol)+","+str(culture['CultureID'])+","+"<time>)";
             cur = dispense(0,"AliquotPlate",aliquotvol,alrow,alcol,onexecute,alplate,bottom=True)
             cur = aspirate(0,"AliquotPlate",100,alrow,alcol,plateid=alplate)
-            cur = dispense(0,"AliquotPlate",100,alrow,alcol,plateid=alplate)
+            cur = dispense(0,"AliquotPlate",100,alrow,alcol,plateid=alplate,bottom=True)
             airgap(0)
             dropTip(0);
         cur = db.execute('INSERT INTO CommandQueue (Command) VALUES ("Home")')
@@ -559,14 +598,10 @@ def restartQueueProcessor():
 def cleanup():
     killQueueProcessor()
 
-@app.route('/calcparasitaemia')
-def calcpar():
-    db = get_db()
-    cur = db.execute('SELECT * FROM Cultures INNER JOIN PlatePositions ON Cultures.CultureID = PlatePositions.CultureID INNER JOIN Plates ON Plates.PlateID=PlatePositions.PlateID AND Plates.PlatePurpose=1 INNER JOIN ( SELECT MAX(timeSampled),* FROM Measurements INNER JOIN PlatePositions ON PlatePositions.Row=Measurements.Row AND PlatePositions.Column=Measurements.Column AND PlatePositions.PlateID = Measurements.PlateID GROUP BY CultureID ) latestparasitaemia ON Cultures.CultureID=latestparasitaemia.CultureID')
-    entries = cur.fetchall()
+def calcExpectedParasitaemas(sqlrows):
     newlist=[];
-    for entry in entries:
-       d = dict(zip(entry.keys(), entry))  
+    for row in sqlrows:
+       d = dict(zip(row.keys(), row))  
        timemeasured=d['timeSampled']
        timenow=time.time()
     
@@ -579,7 +614,19 @@ def calcpar():
            d['expectednow']=expectednow
            d['timediffhours']=timediffhours
            newlist.append(d)
-    newlist = sorted(newlist, key=itemgetter('expectednow'), reverse=True)
+    return(newlist)
+
+@app.route('/calcparasitaemia')
+def calcpar():
+    db = get_db()
+    cur = db.execute('SELECT * FROM Cultures INNER JOIN PlatePositions ON Cultures.CultureID = PlatePositions.CultureID INNER JOIN Plates ON Plates.PlateID=PlatePositions.PlateID AND Plates.PlatePurpose=1 INNER JOIN ( SELECT MAX(timeSampled),* FROM Measurements INNER JOIN PlatePositions ON PlatePositions.Row=Measurements.Row AND PlatePositions.Column=Measurements.Column AND PlatePositions.PlateID = Measurements.PlateID GROUP BY CultureID ) latestparasitaemia ON Cultures.CultureID=latestparasitaemia.CultureID')
+    entries = cur.fetchall()
+    newlist=calcExpectedParasitaemas(entries);
+    newlist= sorted(newlist, key=itemgetter('expectednow'), reverse=True)
     return render_template('calcParasitaemia.html',newlist=newlist);
+
+@app.route('/addPlateForm')
+def addPlateForm():
+    return render_template('newPlateForm.html');
 
 atexit.register(cleanup)   
