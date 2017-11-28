@@ -659,7 +659,7 @@ def killQueueProcessor():
 def restartQueueProcessor():
     global queueProcessor
     killQueueProcessor()
-    queueProcessor=subprocess.Popen(['python', 'queueprocessor.py'],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+    queueProcessor=subprocess.Popen(['python', 'queueprocessor.py','control'],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
     flash("Restarted")
     return redirect(url_for('show_plates'))
     
