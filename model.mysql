@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS Actions
     Column INT,
     TypeOfOperation VARCHAR(20),
        ActionText VARCHAR(20),
-    ValueOfOperation INT,
+    ValueOfOperation NUMERIC,
     ActionTime INT
 );
 

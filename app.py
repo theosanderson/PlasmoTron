@@ -241,10 +241,12 @@ def process_plate():
         cur = db.execute('INSERT INTO CommandQueue (Command, Pipette, Volume, Labware, Row, Column,PlateID) VALUES ("Resuspend",?,?,?,?,?,?)',[pipettenames[pipette],volume,labware,row,col,plateid])
     def airgap(pipette):
         cur = db.execute('INSERT INTO CommandQueue (Command, Pipette) VALUES ("AirGap",?)',[pipettenames[pipette]])
-    def createOnExecute(action,plateid,platerow,platecol):
-
+    def createOnExecute(action,plateid,platerow,platecol,actionValue=None):
+    if actionValue is None:
         onexecute="INSERT INTO Actions (PlateID,Row,Column,TypeOfOperation,ActionTime) VALUES ("+str(plateid)+","+str(platerow)+","+str(platecol)+",'"+action+"',"+"<time>)";
-   
+    else:
+        onexecute="INSERT INTO Actions (PlateID,Row,Column,TypeOfOperation,ActionTime,ValueOfOperation) VALUES ("+str(plateid)+","+str(platerow)+","+str(platecol)+",'"+action+"',"+"<time>,"+str(actionValue)+")";
+
         return(onexecute)
     def getNextMeasurementWell():
         nonlocal MeasurementAvailableWells
@@ -309,7 +311,7 @@ def process_plate():
     tipnumber=0
     
     if request.form['manual']=="split":
-            cur = db.execute('SELECT * FROM Cultures INNER JOIN PlatePositions ON Cultures.CultureID = PlatePositions.CultureID INNER JOIN Plates ON Plates.PlateID=PlatePositions.PlateID AND Plates.PlatePurpose=1 INNER JOIN ( SELECT MAX(timeSampled),* FROM Measurements INNER JOIN PlatePositions ON PlatePositions.Row=Measurements.Row AND PlatePositions.Column=Measurements.Column AND PlatePositions.PlateID = Measurements.PlateID GROUP BY CultureID ) latestparasitaemia ON Cultures.CultureID=latestparasitaemia.CultureID WHERE PlatePositions.PlateID = ?',[request.form['plateid']])
+            cur = db.execute('SELECT *, PlatePositions.Row AS Row, PlatePositions.Column AS Column FROM Cultures INNER JOIN PlatePositions ON Cultures.CultureID = PlatePositions.CultureID INNER JOIN Plates ON Plates.PlateID=PlatePositions.PlateID AND Plates.PlatePurpose=1 INNER JOIN ( SELECT MAX(timeSampled),* FROM Measurements INNER JOIN PlatePositions ON PlatePositions.Row=Measurements.Row AND PlatePositions.Column=Measurements.Column AND PlatePositions.PlateID = Measurements.PlateID GROUP BY CultureID ) latestparasitaemia ON Cultures.CultureID=latestparasitaemia.CultureID WHERE PlatePositions.PlateID = ?',[request.form['plateid']])
             splitcultures=cur.fetchall();
             splitcultures=calcExpectedParasitaemas(splitcultures)
             desiredParasitaemia=float(request.form['parasitaemia'])
@@ -322,18 +324,46 @@ def process_plate():
                     amountToRemove=(1-factor)*fullVolume
                     getTip(0)
                     cur = resuspend(0,"CulturePlate",resuspvol,culture['Row'],culture['Column'],plateid=request.form['plateid'])
+                    cur = resuspend(0,"CulturePlate",resuspvol,culture['Row'],culture['Column'],plateid=request.form['plateid'])
                     cur = aspirate(0,"CulturePlate",amountToRemove,culture['Row'],culture['Column'],plateid=request.form['plateid'])
                     airgap(0)
                     dropTip(0)
-                    addback.append([amountToRemove,culture['Row'],culture['Column'],request.form['plateid']])
+                    addback.append([amountToRemove,culture['Row'],culture['Column'],request.form['plateid'],factor])
             getTip(0)
             for item in addback:
                 cur = aspirate(0,"TubMedia",item[0])
-                onexec=createOnExecute("split",request.form['plateid'],culture['Row'],culture['Column'])
+                onexec=createOnExecute("split",request.form['plateid'],item[1],item[2],factor)
                 cur = dispense(0,"CulturePlate",item[0],item[1],item[2],onexec,plateid=item[3])
             dropTip(0)
 
-
+    elif request.form['manual']=="splittonewplate":
+            cur = db.execute('SELECT *, PlatePositions.Row AS Row, PlatePositions.Column AS Column FROM Cultures INNER JOIN PlatePositions ON Cultures.CultureID = PlatePositions.CultureID INNER JOIN Plates ON Plates.PlateID=PlatePositions.PlateID AND Plates.PlatePurpose=1 INNER JOIN ( SELECT MAX(timeSampled),* FROM Measurements INNER JOIN PlatePositions ON PlatePositions.Row=Measurements.Row AND PlatePositions.Column=Measurements.Column AND PlatePositions.PlateID = Measurements.PlateID GROUP BY CultureID ) latestparasitaemia ON Cultures.CultureID=latestparasitaemia.CultureID WHERE PlatePositions.PlateID = ?',[request.form['plateid']])
+            splitcultures=cur.fetchall();
+            splitcultures=calcExpectedParasitaemas(splitcultures)
+            desiredParasitaemia=float(request.form['parasitaemia'])
+            if not (desiredParasitaemia >0 and desiredParasitaemia <101):
+                return ("Error, enter reasonable parasitaemia")
+            addback=[]
+            getTip(0)
+            for culture in splitcultures:
+                if culture['expectednow'] > desiredParasitaemia:
+                    factor=desiredParasitaemia/culture['expectednow']
+                    amountToTransfer=(factor)*fullVolume
+                    amountOfNewBlood=(1-factor)*fullVolume
+                    
+                    cur = aspirate(0,"TubBlood",amountOfNewBlood)
+                    cur = dispense(0,"CulturePlate2",amountOfNewBlood,culture['Row'],culture['Column'],plateid=request.form['plateid'])
+                   
+                    addback.append([amountToTransfer,culture['Row'],culture['Column'],request.form['plateid']])
+            dropTip(0)
+            for item in addback:
+                getTip(0)
+                cur = resuspend(0,"CulturePlate",item[0],item[1],item[2],plateid=item[3])
+                cur = aspirate(0,"CulturePlate",item[0],item[1],item[2],plateid=item[3])
+                onexec=createOnExecute("split",request.form['plateid'],culture['Row'],culture['Column'])
+                cur = dispense(0,"CulturePlate2",item[0],item[1],item[2],onexec,plateid=item[3],bottom=True)
+                dropTip(0)
+         
 
     elif request.form['manual']=="dispense-sybr-green":
     	getTip(0)
@@ -362,17 +392,18 @@ def process_plate():
            
         dropTip(0)
         cur = db.execute('INSERT INTO CommandQueue (Command) VALUES ("Home")')
-    elif request.form['manual']=="feedandaliquot":
+    elif request.form['manual']=="feedandaliquot" or request.form['manual']=="justaliquot":
         cur = db.execute('INSERT INTO CommandQueue (Command, Labware, LabwareType,Slot) VALUES ("InitaliseLabware","AliquotPlate","96-flat","C1")')
         for culture in cultures:
             getTip(0)
-            cur = aspirate(0,"CulturePlate",feedVolume+extraRemoval,culture['Row'],culture['Column'],request.form['plateid'])
-            airgap(0)
-            dropTip(0)
-            getTip(0)
-            cur = aspirate(0,"TubMedia",feedVolume)
-            onexec=createOnExecute("feed",request.form['plateid'],culture['Row'],culture['Column'])
-            cur = dispense(0,"CulturePlate",feedVolume,culture['Row'],culture['Column'],onexec,plateid=request.form['plateid'],bottom=True)
+            if request.form['manual']=="feedandaliquot":
+                cur = aspirate(0,"CulturePlate",feedVolume+extraRemoval,culture['Row'],culture['Column'],request.form['plateid'])
+                airgap(0)
+                dropTip(0)
+                getTip(0)
+                cur = aspirate(0,"TubMedia",feedVolume)
+                onexec=createOnExecute("feed",request.form['plateid'],culture['Row'],culture['Column'])
+                cur = dispense(0,"CulturePlate",feedVolume,culture['Row'],culture['Column'],onexec,plateid=request.form['plateid'],bottom=True)
             cur = resuspend(0,"CulturePlate",resuspvol,culture['Row'],culture['Column'],plateid=request.form['plateid'])
             cur = aspirate(0,"CulturePlate",aliquotvol,culture['Row'],culture['Column'],plateid=request.form['plateid'])
             (alplate,alrow,alcol)=getNextMeasurementWell();
@@ -411,6 +442,32 @@ def process_plate():
            
         dropTip(0)
         cur = db.execute('INSERT INTO CommandQueue (Command) VALUES ("Home")')
+    elif request.form['manual']=="feedanddiscard50":
+        cur = aspirate(0,"TubMedia",1500)
+        cur = db.execute('INSERT INTO CommandQueue (Command, Labware, LabwareType,Slot) VALUES ("InitaliseLabware","AliquotPlate","96-flat","C1")')
+        for culture in cultures:
+            getTip(0)
+            cur = aspirate(0,"CulturePlate",feedVolume+extraRemoval,culture['Row'],culture['Column'],plateid=request.form['plateid'])
+            airgap(0)
+            dropTip(0)
+            getTip(0)
+            cur = aspirate(0,"TubMedia",feedVolume)
+            cur = dispense(0,"CulturePlate",feedVolume,culture['Row'],culture['Column'],plateid=request.form['plateid'],bottom=True)
+            cur = resuspend(0,"CulturePlate",resuspvol,culture['Row'],culture['Column'],plateid=request.form['plateid'])
+            cur = aspirate(0,"CulturePlate",500,culture['Row'],culture['Column'],plateid=request.form['plateid'])
+            airgap(0)
+            dropTip(0)
+        getTip(0)
+        vol=0
+        for culture in cultures:
+            if vol==0:
+                cur = aspirate(0,"TubBlood",1000)
+                vol=1000
+            cur = dispense(0,"CulturePlate",500,culture['Row'],culture['Column'],plateid=request.form['plateid'])
+            vol=vol-1000
+           
+        dropTip(0)
+        cur = db.execute('INSERT INTO CommandQueue (Command) VALUES ("Home")')
 
         
     elif request.form['manual']=="auto":
@@ -440,6 +497,7 @@ def view_refreshed():
 def justQueue():
     db = get_db()
     cur = db.execute('SELECT * FROM CommandQueue WHERE doneAt IS NULL')
+    output=None;
     if queueProcessor == "beginning":
         result="notstarted"
     else:
@@ -447,7 +505,9 @@ def justQueue():
         if poll ==None:
             result="running"
         else:
-            result="crashed"
+            
+           result="Crashed"
+           #It would be nice to capture output and display it but this seems to involve threading..
     return render_template('justQueue.html', queue=cur.fetchall(),status=result)
 
 @app.route('/clearqueue', methods=['POST'])
@@ -568,6 +628,15 @@ def clearReadings():
     flash("Deleted "+str(result)+ " measurements")
     db.commit()
     return redirect(url_for('show_plate',plateID=request.form['plateID']))
+
+@app.route('/deletePlate', methods=['POST'])
+def deletePlate():
+    db = get_db()
+    cursor=db.execute('DELETE FROM Plates WHERE PlateID = ?',  [request.form['plateID']])
+    result = cursor.rowcount
+    flash("Deleted "+str(result)+ " plate")
+    db.commit()
+    return redirect(url_for('show_plates'))
 @app.route('/killQueueProcessor', methods=['POST'])
 def killQueueProcessor():
     global queueProcessor
@@ -590,8 +659,8 @@ def killQueueProcessor():
 def restartQueueProcessor():
     global queueProcessor
     killQueueProcessor()
-    queueProcessor=subprocess.Popen(['python', 'queueprocessor.py'])
-    flash("And started")
+    queueProcessor=subprocess.Popen(['python', 'queueprocessor.py'],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+    flash("Restarted")
     return redirect(url_for('show_plates'))
     
     

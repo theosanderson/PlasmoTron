@@ -1,6 +1,7 @@
 {% extends "layout.html" %}
 {% block body %}
  <h2>Plate: {{ plate.PlateName }} <small>({{ plate.PlateRows * plate.PlateCols }})</small></h2>
+ {% if plate.PlatePurpose != 2 %}
     <form action="{{ url_for('add_culture') }}" method=post class=add-entry>
       <h3>Define a new culture and add to this plate</h3>
       <dl>
@@ -9,6 +10,7 @@
      <input type=hidden size=30 name=plateID value="{{plate.PlateID}}"> <input name="row" style="width:20px;" id="row"><input name="col" style="width:20px;" id="col"><input value="Add" type="submit">
       </dl>
     </form>
+    {% endif %}
 <h1></h1>
   
 <h3>Plate layout</h3>
@@ -32,7 +34,7 @@
       <h3>Process plate</h3>
       <dl>
         <dt>Custom action:
-      <input type=hidden size=30 name=plateid value="{{plate.PlateID}}"><select name="manual"><option value="auto">Automatic</option><option value="feed">Feed</option><option value="split">Split</option><option value="feedandaliquot">Feed and aliquot</option><option value="feedanddiscard30">Feed and discard 30</option><option value="dispense-sybr-green">Dispense Sybr green</option></select><br>
+      <input type=hidden size=30 name=plateid value="{{plate.PlateID}}"><select name="manual"><option value="auto">Automatic</option><option value="feed">Feed</option><option value="split">Split</option><option value="splittonewplate">Split to new plate</option><option value="justaliquot">Just take aliquot</option><option value="feedandaliquot">Feed and aliquot</option><option value="feedanddiscard30">Feed and discard 30%</option><option value="feedanddiscard50">Feed and discard 50%</option><option value="dispense-sybr-green">Dispense Sybr green</option></select><br>
 
         Rows used (P200): <input name="tips200"  id="tip200" value="0"/>
 <br>
@@ -44,10 +46,11 @@
       $.fn.numpad.defaults.displayTpl = '<input type="text" class="form-control" />';
       $.fn.numpad.defaults.buttonNumberTpl =  '<button type="button" class="btn btn-default"></button>';
       $.fn.numpad.defaults.buttonFunctionTpl = '<button type="button" class="btn" style="width: 100%;"></button>';
+      $.fn.numpad.defaults.buttonFunctionTpl = '<button type="button" class="btn" style="width: 100%;"></button>';
       $.fn.numpad.defaults.onKeypadCreate = function(){$(this).find('.done').addClass('btn-primary');};
       
   $('#tip1000').numpad();
-  $('#parasitaemia').numpad();
+  //$('#parasitaemia').numpad();
 </script>
 <br/>
 <input type="submit" value="Plan plate processing" /></dd>
@@ -94,5 +97,11 @@
          <input type=submit value="Clear readings">
     </form>
 {% endif %}
+
+ <form method=post  action="/deletePlate">
+      <p>
+        <input type=hidden size=30 name=plateID value="{{plate.PlateID}}">
+         <input type=submit value="Delete plate" onclick="return confirm('Are you sure you want to delete this plate?')">
+    </form>
 
 {% endblock %}

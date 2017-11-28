@@ -42,8 +42,9 @@ table.plate tr:nth-child(even) td.highlight{
 div.rightmenu{float:right;}
 li.inqueue{color:green;}
 li.done{color:gray;}
-
+a.finished,a.finished h2{color:gray; !important}
 li#first{font-size:200%; color:black; font-weight:bold;}
 
 input,select {font-size:120%;}
 button{font-size:200%;}
+

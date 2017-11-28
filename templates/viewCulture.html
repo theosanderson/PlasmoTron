@@ -13,6 +13,11 @@
 <div class="result" style="width:100% height:200px; margin:0 auto;">
 </div>
 <script>
+
+    
+  markers=[ {% for item in actions %} { 'label':'{{item.TypeOfOperation}}' , {%if item.doneAt is not none %} 'date': {{item.ActionTime*1000}} {% endif %} } {{ "," if not loop.last }} {% endfor %}];
+ 
+     
 data=[{% for item in measurements %}{date:new Date({{item.timeSampled * 1000}}),parasitaemia:{{item.MeasurementValue}}}{{ "," if not loop.last }}{% endfor %}];
     </script>
 
@@ -23,6 +28,7 @@ MG.data_graphic({
  
   
   data: data,
+  markers:markers,
   full_width:true,
   height: 200,
   target: ".result",
@@ -30,7 +36,9 @@ MG.data_graphic({
   y_accessor: "parasitaemia",
    x_label: 'Date',
         y_label: 'Parasitaemia',
-        max_y:10
+        interpolate: d3.curveLinear,
+        max_y:10,
+         max_x: Date.now()
 
 });
 
