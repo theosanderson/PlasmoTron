@@ -19,22 +19,33 @@ Specifically PlasmoTron provides these features:
 
 We have an OT-One S Hood, sitting permanantly in a tissue culture hood. We would suggest that you get familar with calibrating and operating the OpenTrons robot using conventional protocols before you begin to try to establish PlasmoTron, because familiarity with how the robot works under the hood will be helpful.
 
+While PlasmoTron could be adapted to other robotic systems this will require a little work.
+
 #### Server / robot handling computer
 
-PlasmoTron is intended to run on a dedicated computer, which will control the robot. This computer needs to be near enough the robot to connect by USB. It should also be networked to the internet or an intranet so that users can access their culture information remotely. It is furthermore helpful if the computer can be directly controlled (mouse, keyboard, screen), especially in the event of a network outage. The computer does not need to be powerful.
+PlasmoTron is intended to run on a dedicated computer, which will control the robot and also host the web app and database that stores culture information. This computer needs to be near enough the robot to connect by USB. It should also be networked to the internet or an intranet so that users can access their culture information remotely. It is furthermore helpful if the computer can be directly controlled (mouse, keyboard, screen), especially in the event of a network outage. The computer does not need to be powerful.
 
-Our solution is to use a $40 Raspberry Pi computer, with an integrated touch screen, which is mounted to the tissue culture hood. The USB and power cables to the robot are run directly into the hood through the gasket seal (which we resealed with some Sugru). Many similar alternatives would be possible, including an i86 based tablet PC.
+The approach we ourselves use is to use a $40 Raspberry Pi computer, with an integrated touch screen, which is mounted to the tissue culture hood. The USB and power cables to the robot are run directly into the hood through the gasket seal (which we resealed with some Sugru). Many similar alternatives would be possible, including an i86 based tablet PC.
 
 
-### A working OpenTrons robot in a tissue culture hood
+### Software
 
-To calibrate the labware to the robot you will to use the OpenTrons app. On a Raspberry Pi this means building from source, which we found relatively challenging. You will have an easier time on other systems, but with a less pleasing form factor. For us this was the most difficult part of the procedure. I gather a non-GUI based calibration system is in the works.
+#### OpenTrons app
+To calibrate the positions of labware on your robot you will need to install the [https://opentrons.com/ot-app OpenTrons app]. This is trivial for many systems. For a Raspberry Pi it is rather more complex as you will need to [https://github.com/Opentrons/opentrons install from source], but this is beyond the scope of these instructions.
 
-### Python
+If you have gone down the Raspberry Pi touchscreen approach, you may want to [https://www.raspberrypi.org/documentation/remote-access/vnc/ connect remotely over VNC] for calibration to allow a larger screen size.
 
-Your environment should be set up for Python 3.6+, which is required for OpenTrons.
+#### Prerequisites
 
-### Flask
+##### Python
 
-We have been using Flask 0.13-dev.
+Your environment should be set to use Python 3.6+, which is required for OpenTrons.
+##### OpenTrons API
+You need to install [http://docs.opentrons.com/writing.html#jupyter-notebook the OpenTrons API] which provides a package to allow the use of the OpenTrons robot in arbitrary Python scripts.
+
+```
+pip install --upgrade opentrons 
+```
+##### Flask
+[http://flask.pocoo.org/ Flask] is the lightweight web server on which PlasmoTron runs. It is a prerequisite for PlasmoTron. We have been using Flask 0.13-dev.
 
