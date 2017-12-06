@@ -18,7 +18,7 @@ if not CalibrationMode:
     dbd = sqlite3.connect('flaskr.db', timeout=100000)
 
 containers.create("epmotion30",grid=(8,1),spacing=(9.02,9.02),diameter=10,depth=55)
-
+containers.create("24corning",grid=(4,6),spacing=(19.304,19.304),diameter=16.26,depth=18)
 equipment['trash']=containers.load('point', "C1","trash")
 equipment['p200rack'] = containers.load('tiprack-200ul', 'E2', 'tiprack200')
 #p200rack2 = containers.load('tiprack-200ul', 'A2', 'tiprack200no2')
