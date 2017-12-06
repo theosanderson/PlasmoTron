@@ -13,6 +13,7 @@ import sys
 import atexit
 from operator import itemgetter
 
+
 ALLOWED_EXTENSIONS = set(['csv'])
 
 def eprint(*args, **kwargs):
@@ -21,6 +22,7 @@ app = Flask(__name__) # create the application instance :)
 app.config.from_object(__name__) # load config from this file , flaskr.py
 queueProcessor="beginning";
 
+InitComand=0
 # Load default config and override config from an environment variable
 app.config.update(dict(
     DATABASE=os.path.join(app.root_path, 'flaskr.db'),
@@ -99,6 +101,8 @@ def close_db(error):
         g.sqlite_db.close()
 
 def init_db():
+    global InitCommand
+    InitCommand=1
     db = get_db()
     with app.open_resource('model.mysql', mode='r') as f:
         db.cursor().executescript(f.read())
@@ -642,20 +646,21 @@ def deletePlate():
     return redirect(url_for('show_plates'))
 @app.route('/killQueueProcessor', methods=['POST'])
 def killQueueProcessor():
-    global queueProcessor
-    if queueProcessor !="beginning":
-        pid = queueProcessor.pid
-        queueProcessor.terminate()
+    if not InitCommand:
+        global queueProcessor
+        if queueProcessor !="beginning":
+            pid = queueProcessor.pid
+            queueProcessor.terminate()
 
-    # Check if the process has really terminated & force kill if not.
-        try:
-          os.kill(pid, 0)
-          queueProcessor.kill()
-          flash("Forced kill")
-        except OSError as e:
-           flash("Terminated gracefully")
+        # Check if the process has really terminated & force kill if not.
+            try:
+              os.kill(pid, 0)
+              queueProcessor.kill()
+              flash("Forced kill")
+            except OSError as e:
+               flash("Terminated gracefully")
 
-    return redirect(url_for('show_plates'))
+        return redirect(url_for('show_plates'))
     
 
 @app.route('/restartQueueProcessor', methods=['POST'])
