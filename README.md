@@ -35,7 +35,7 @@ To calibrate the positions of labware on your robot you will need to install the
 
 If you have gone down the Raspberry Pi touchscreen approach, you may want to [connect remotely over VNC](https://www.raspberrypi.org/documentation/remote-access/vnc/) for calibration to allow a larger screen size.
 
-#### Prerequisites
+#### Dependencies
 
 ##### Python
 
@@ -49,3 +49,7 @@ pip install --upgrade opentrons
 ##### Flask
 [Flask](http://flask.pocoo.org/) is the lightweight web server on which PlasmoTron runs. It is a prerequisite for PlasmoTron. We have been using Flask 0.13-dev.
 
+## Installation
+```
+git clone https://github.com/theosanderson/plasmotron.git
+```
