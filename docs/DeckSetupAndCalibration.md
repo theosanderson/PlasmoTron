@@ -1,3 +1,5 @@
+[Home](/) - [Installation](Installation.md) - Deck setup and calibration - [PlasmoTron tutorial](Tutorial.md) 
+
 ## Deck set up and calibration
 
 This Flask app is essentially a replacement for the OpenTrons interface. In regular use you will not need to use the OpenTrons app. However you do need to use the app one more time -- to set up the layout you will use for culture.
