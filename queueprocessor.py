@@ -27,8 +27,8 @@ equipment['p1000rack']  = containers.load('tiprack-1000ulT', 'A1', 'tiprack1000T
 equipment['CulturePlate']  = containers.load('24corning', 'B2', 'CulturePlate24')
 equipment['CulturePlate2']  = containers.load('24corning', 'C2', 'CulturePlate242')
 equipment['AliquotPlate']  = containers.load('96-flat', 'C2', 'AliquotPlate')
-equipment['TubBlood']=containers.load('epmotion30', "D1","TubBloodWhite")
-equipment['TubMedia']=containers.load('epmotion30', "D1","TubBlood")
+equipment['TubBlood']=containers.load('epmotion30', "D1","TubBlood")
+equipment['TubMedia']=containers.load('epmotion30', "D1","TubMedia")
 equipment['TubSybr']=containers.load('epmotion30', "D1","TubSybr")
 
 equipment['p1000'] = instruments.Pipette(
@@ -96,7 +96,7 @@ else:
                     raise Exception("Where are tips?") 
 
                 equipment[command['Pipette']].pick_up_tip(location)
-            if command['Command']=="Resuspend":
+            if command['Command']=="Resuspend" or command['Command']=="ResuspendDouble":
                 if command['Row'] is not None:
                     location=equipment[command['Labware']].cols(int(command['Row'])).wells(int(command['Column']))
                 else:
@@ -119,6 +119,23 @@ else:
                 destination = (location, well_edge)
                 equipment[command['Pipette']].aspirate(700,destination,rate=1)
                 equipment[command['Pipette']].dispense(700,destination,rate=2)
+                if command['Command']=="ResuspendDouble":
+                    well_edge = location.from_center(x=0.35,y=0.35,z=-1)
+                    destination = (location, well_edge)
+                    equipment[command['Pipette']].aspirate(700,destination,rate=1)
+                    equipment[command['Pipette']].dispense(700,destination,rate=2)
+                    well_edge = location.from_center(x=-0.35,y=-0.35,z=-1)
+                    destination = (location, well_edge)
+                    equipment[command['Pipette']].aspirate(700,destination,rate=1)
+                    equipment[command['Pipette']].dispense(700,destination,rate=2)
+                    well_edge = location.from_center(x=-0.35,y=.35,z=-1)
+                    destination = (location, well_edge)
+                    equipment[command['Pipette']].aspirate(700,destination,rate=1)
+                    equipment[command['Pipette']].dispense(700,destination,rate=2)
+                    well_edge = location.from_center(x=.35,y=-0.35,z=-1)
+                    destination = (location, well_edge)
+                    equipment[command['Pipette']].aspirate(700,destination,rate=1)
+                    equipment[command['Pipette']].dispense(700,destination,rate=2)
                 
             if command['Command']=="Dispense":
                 if command['Row'] is not None:

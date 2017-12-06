@@ -237,15 +237,19 @@ def process_plate():
         else:
             cur = db.execute('INSERT INTO CommandQueue (Command, Pipette, Volume, Labware, Row, Column,OnCompletion,PlateID) VALUES ("Dispense",?,?,?,?,?,?,?)',[pipettenames[pipette],volume,labware,row,col,oncompletion,plateid])
     
-    def resuspend(pipette,labware,volume,row=None,col=None,plateid=None):
-        cur = db.execute('INSERT INTO CommandQueue (Command, Pipette, Volume, Labware, Row, Column,PlateID) VALUES ("Resuspend",?,?,?,?,?,?)',[pipettenames[pipette],volume,labware,row,col,plateid])
+    def resuspend(pipette,labware,volume,row=None,col=None,plateid=None,double=False):
+        if double==False:
+            Command="Resuspend"
+        else:
+            Command="ResuspendDouble"
+        cur = db.execute('INSERT INTO CommandQueue (Command, Pipette, Volume, Labware, Row, Column,PlateID) VALUES (?,?,?,?,?,?,?)',[Command,pipettenames[pipette],volume,labware,row,col,plateid])
     def airgap(pipette):
         cur = db.execute('INSERT INTO CommandQueue (Command, Pipette) VALUES ("AirGap",?)',[pipettenames[pipette]])
     def createOnExecute(action,plateid,platerow,platecol,actionValue=None):
-    if actionValue is None:
-        onexecute="INSERT INTO Actions (PlateID,Row,Column,TypeOfOperation,ActionTime) VALUES ("+str(plateid)+","+str(platerow)+","+str(platecol)+",'"+action+"',"+"<time>)";
-    else:
-        onexecute="INSERT INTO Actions (PlateID,Row,Column,TypeOfOperation,ActionTime,ValueOfOperation) VALUES ("+str(plateid)+","+str(platerow)+","+str(platecol)+",'"+action+"',"+"<time>,"+str(actionValue)+")";
+        if actionValue is None:
+            onexecute="INSERT INTO Actions (PlateID,Row,Column,TypeOfOperation,ActionTime) VALUES ("+str(plateid)+","+str(platerow)+","+str(platecol)+",'"+action+"',"+"<time>)";
+        else:
+            onexecute="INSERT INTO Actions (PlateID,Row,Column,TypeOfOperation,ActionTime,ValueOfOperation) VALUES ("+str(plateid)+","+str(platerow)+","+str(platecol)+",'"+action+"',"+"<time>,"+str(actionValue)+")";
 
         return(onexecute)
     def getNextMeasurementWell():
@@ -323,16 +327,15 @@ def process_plate():
                     factor=desiredParasitaemia/culture['expectednow']
                     amountToRemove=(1-factor)*fullVolume
                     getTip(0)
-                    cur = resuspend(0,"CulturePlate",resuspvol,culture['Row'],culture['Column'],plateid=request.form['plateid'])
-                    cur = resuspend(0,"CulturePlate",resuspvol,culture['Row'],culture['Column'],plateid=request.form['plateid'])
+                    cur = resuspend(0,"CulturePlate",resuspvol,culture['Row'],culture['Column'],plateid=request.form['plateid'],double=True)
                     cur = aspirate(0,"CulturePlate",amountToRemove,culture['Row'],culture['Column'],plateid=request.form['plateid'])
                     airgap(0)
                     dropTip(0)
                     addback.append([amountToRemove,culture['Row'],culture['Column'],request.form['plateid'],factor])
             getTip(0)
             for item in addback:
-                cur = aspirate(0,"TubMedia",item[0])
-                onexec=createOnExecute("split",request.form['plateid'],item[1],item[2],factor)
+                cur = aspirate(0,"TubBlood",item[0])
+                onexec=createOnExecute("split",request.form['plateid'],item[1],item[2],item[4])
                 cur = dispense(0,"CulturePlate",item[0],item[1],item[2],onexec,plateid=item[3])
             dropTip(0)
 
@@ -354,13 +357,13 @@ def process_plate():
                     cur = aspirate(0,"TubBlood",amountOfNewBlood)
                     cur = dispense(0,"CulturePlate2",amountOfNewBlood,culture['Row'],culture['Column'],plateid=request.form['plateid'])
                    
-                    addback.append([amountToTransfer,culture['Row'],culture['Column'],request.form['plateid']])
+                    addback.append([amountToTransfer,culture['Row'],culture['Column'],request.form['plateid'],factor])
             dropTip(0)
             for item in addback:
                 getTip(0)
                 cur = resuspend(0,"CulturePlate",item[0],item[1],item[2],plateid=item[3])
                 cur = aspirate(0,"CulturePlate",item[0],item[1],item[2],plateid=item[3])
-                onexec=createOnExecute("split",request.form['plateid'],culture['Row'],culture['Column'])
+                onexec=createOnExecute("split",request.form['plateid'],culture['Row'],culture['Column'],item[4])
                 cur = dispense(0,"CulturePlate2",item[0],item[1],item[2],onexec,plateid=item[3],bottom=True)
                 dropTip(0)
          
@@ -659,9 +662,12 @@ def killQueueProcessor():
 def restartQueueProcessor():
     global queueProcessor
     killQueueProcessor()
-    queueProcessor=subprocess.Popen(['python', 'queueprocessor.py','control'],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+    if "simulate" in request.form:
+        queueProcessor=subprocess.Popen(['python', 'queueprocessor.py','simulate'],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+    else:
+        queueProcessor=subprocess.Popen(['python', 'queueprocessor.py','control'],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
     flash("Restarted")
-    return redirect(url_for('show_plates'))
+    return redirect(url_for('view_refreshed'))
     
     
 def cleanup():
