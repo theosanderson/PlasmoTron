@@ -53,3 +53,35 @@ pip install --upgrade opentrons
 ```
 git clone https://github.com/theosanderson/plasmotron.git
 ```
+
+Now navigate to the PlasmoTron directory:
+
+```
+cd plasmotron
+```
+
+First we need to initialise the database:
+```
+flask initdb
+```
+
+
+## Running
+Now let's try running the app:
+```
+flask run
+```
+With a bit of luck you will see:
+```
+pi@raspberrypi:~/flask $ flask run
+ * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+ ```
+
+ Which means the web server is now running.
+
+ Fire up your browser on the machine and go to http://127.0.0.1:5000/ Hopefully you will see something like this:
+
+ initialview
+
+ You probably want to click *Create new culture plate*
+

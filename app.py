@@ -22,7 +22,7 @@ app = Flask(__name__) # create the application instance :)
 app.config.from_object(__name__) # load config from this file , flaskr.py
 queueProcessor="beginning";
 
-InitComand=0
+InitCommand=0
 # Load default config and override config from an environment variable
 app.config.update(dict(
     DATABASE=os.path.join(app.root_path, 'flaskr.db'),
