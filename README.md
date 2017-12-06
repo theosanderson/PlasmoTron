@@ -66,7 +66,7 @@ flask initdb
 ```
 
 
-## Running
+## First test run
 Now let's try running the app:
 ```
 flask run
@@ -77,11 +77,109 @@ pi@raspberrypi:~/flask $ flask run
  * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
  ```
 
- Which means the web server is now running.
+Which means the web server is now running.
 
- Fire up your browser on the machine and go to http://127.0.0.1:5000/ Hopefully you will see something like this:
+Fire up your browser on the machine and go to http://127.0.0.1:5000/ Hopefully you will see something like this:
 
- initialview
+initialview
 
- You probably want to click *Create new culture plate*
+If so, you should be all set in terms of installation.
+
+## Deck set up and calibration
+
+This Flask app is essentially a replacement for the OpenTrons interface. In regular use you will not need to use the OpenTrons app. However you do need to use the app one more time -- to set up the layout you will use for culture.
+
+If you have already experimented with running some protocols in OpenTrons (which you really should have before starting this!) you will be aware of how to perform calibration. First lets check you are happy with the deck setup.
+
+Using an editor of your choice, open queueprocess.py in the plasmotron directory.
+
+Find the section where the deck layout is defined.
+
+Let's have a look at one of those lines:
+
+```{python}
+equipment['TubMedia']=containers.load('epmotion30', "D1","TubMedia")
+```
+The bit on the left-hand-side defines that this is a new piece of equipment called "TubMedia". That name is hardcoded into other parts of the programme so you don't want to change it. There are two parts you can safely change. One is the first argument of the load function, which specifies the geometry of this container on the deck.
+
+OpenTrons has a whole lot of [built-in containers](http://docs.opentrons.com/containers.html). You can see them all [here](https://andysigler.github.io/ot-api-containerviz/). You can also add your own as we did at the top with:
+
+```{python}
+containers.create("24corning",grid=(4,6),spacing=(19.304,19.304),diameter=16.26,depth=18) #24-well plate
+```
+
+Going back to the definition of TubMedia, the other part we can change is "D1". You can decide where on the deck you want any particular item to go. The key items are as follows:
+
+* Tipbox Where the pipette goes to collect a new tip
+* Trash This is defined as a point in space, which should be over your trash container (the bigger the better)
+* CulturePlate This is the primary position where you will put a culture plate to be fed, or split.
+* AliquotPlate This is where a 96-well measurement plate will be placed to collect aliquots of the culture for measurement.
+* CulturePlate2 Sometimes we want to split from one plate into another. This is the location we will put the second plate at. It can be the same position in the deck as the AliquotPlate
+* TubMedia,TubBlood, TubSybr These are tubs where we will get the media, blood and SYBR-green respectively. We use EpMotion 30ml reservoirs for these, but you can customise as you want.
+
+Do edit this file to suit your preferences.
+
+When you are done, save it.
+
+Now we are ready to calibrate. Load up the OpenTrons app. Press *Click to upload* and navigate to the plasmotron directory. Open the queueprocessor.py file.
+
+If any sort of error occurs you have probably introduced an error while modifying the Deck Setup. You may want to revert to the [original file](https://github.com/theosanderson/plasmotron/blob/master/queueprocessor.py) and slowly make changes until you find the source of the problem.
+
+But hopefully no errors occur and you are presented with a screen something like this:
+
+ calibration
+
+Now proceed to calibrate as described in the [OpenTrons documentation](https://support.opentrons.com/getting-started/software-setup/calibrating-the-deck), until every item of equipment you need to use has a green tick. 
+
+We're now ready to close the OpenTrons app and open up the web application. If the calibration is correct we will never need the OpenTrons app again.
+
+### Create and populate your first plate
+
+So once again it is
+```
+cd plasmotron
+flask run
+```
+
+And send your browser to http://127.0.0.1:5000/
+
+Note that if you have connected your device to the network you can also access this from a remote computer using http://[server's IP address here]:5000/
+
+Regardless, you should get to
+
+initialview
+
+To start off click on *Create new culture plate*. 
+
+Give your plate a name, and specify its geometry.
+
+platecreation
+
+Press Create plate and you will be returned to the home-page where you will see your first cultureplate listed.
+
+step3
+
+Click on the plate.
+
+step4
+
+Here you can see the current cultures on the plate (there aren't any!)
+
+Add one by typing in a name and pressing add.
+
+step5
+
+There is our first culture. You can add more. You'll notice by default that the cultures are added sequentially going top-to-bottom and then left-to-right. But you can also place a culture wherever you want. Just click on a well and the next culture will be placed in that custom position instead.
+
+step6
+
+Now we have our first plate!
+
+It is probably useful to actually physically set up this plate, or maybe to start with just some water (or food colouring) in a plate. Fill the same wells you have indicated with 1ml of liquid.
+
+
+
+
+
+
 

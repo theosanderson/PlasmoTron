@@ -17,13 +17,15 @@ if not CalibrationMode:
     import string
     dbd = sqlite3.connect('flaskr.db', timeout=100000)
 
-containers.create("epmotion30",grid=(8,1),spacing=(9.02,9.02),diameter=10,depth=55)
-containers.create("24corning",grid=(4,6),spacing=(19.304,19.304),diameter=16.26,depth=18)
+############## DECK LAYOUT BEGINS HERE
+#CONTAINERS:
+containers.create("epmotion30",grid=(8,1),spacing=(9.02,9.02),diameter=10,depth=55) #EpMotion Reservoir
+containers.create("24corning",grid=(4,6),spacing=(19.304,19.304),diameter=16.26,depth=18) #24-well plate
+
+#DECK:
 equipment['trash']=containers.load('point', "C1","trash")
 equipment['p200rack'] = containers.load('tiprack-200ul', 'E2', 'tiprack200')
-#p200rack2 = containers.load('tiprack-200ul', 'A2', 'tiprack200no2')
 equipment['p1000rack']  = containers.load('tiprack-1000ulT', 'A1', 'tiprack1000T')
-#p1000rack2 = containers.load('tiprack-1000ul', 'D2', 'tiprack1000no2')
 equipment['CulturePlate']  = containers.load('24corning', 'B2', 'CulturePlate24')
 equipment['CulturePlate2']  = containers.load('24corning', 'C2', 'CulturePlate242')
 equipment['AliquotPlate']  = containers.load('96-flat', 'C2', 'AliquotPlate')
@@ -31,6 +33,7 @@ equipment['TubBlood']=containers.load('epmotion30', "D1","TubBlood")
 equipment['TubMedia']=containers.load('epmotion30', "D1","TubMedia")
 equipment['TubSybr']=containers.load('epmotion30', "D1","TubSybr")
 
+#PIPETTE(S)
 equipment['p1000'] = instruments.Pipette(
     name="P1000",
     axis="b",
@@ -39,6 +42,8 @@ equipment['p1000'] = instruments.Pipette(
     tip_racks=[equipment['p1000rack']],
     trash_container=equipment['trash']
 )
+
+############## DECK LAYOUT ENDS HERE
 
 
 #equipment['p200x8'] = instruments.Pipette(
