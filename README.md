@@ -103,22 +103,24 @@ Let's have a look at one of those lines:
 ```{python}
 equipment['TubMedia']=containers.load('epmotion30', "D1","TubMedia")
 ```
-The bit on the left-hand-side defines that this is a new piece of equipment called `"TubMedia"`. That name is hardcoded into other parts of the programme so you don't want to change it. There are two parts you can safely change. One is the first argument of the load function, which specifies the geometry of this container on the deck.
+The bit on the left-hand-side defines that this is a new piece of equipment called `"TubMedia"`. That name is hardcoded into other parts of the programme so you don't want to change it. There are two parts you can safely change. One is the second argument of the load function, currently `"D1"` which specifies where on the deck the container is to be found. Feel free to change these values as you wish.
 
-OpenTrons has a whole lot of [built-in containers](http://docs.opentrons.com/containers.html). You can see them all [here](https://andysigler.github.io/ot-api-containerviz/). You can also add your own as we did at the top with:
+The other part we could change is `"epmotion30"`, this defines the type of container that is being used which determines its geometry.
+
+OpenTrons has a whole lot of [built-in containers](http://docs.opentrons.com/containers.html). You can see them all [here](https://andysigler.github.io/ot-api-containerviz/). You can also add your own containers, which we did in this case at the top with:
 
 ```{python}
 containers.create("24corning",grid=(4,6),spacing=(19.304,19.304),diameter=16.26,depth=18) #24-well plate
 ```
 
-Going back to the definition of TubMedia, the other part we can change is "D1". You can decide where on the deck you want any particular item to go. The key items are as follows:
+It is important that the deck layout section defines these key components.
 
 * **Tipbox** Where the pipette goes to collect a new tip
 * **Trash** This is defined as a point in space, which should be over your trash container (the bigger the better)
 * **CulturePlate** This is the primary position where you will put a culture plate to be fed, or split.
 * **AliquotPlate** This is where a 96-well measurement plate will be placed to collect aliquots of the culture for measurement.
 * **CulturePlate2** Sometimes we want to split from one plate into another. This is the location we will put the second plate at. It can be the same position in the deck as the AliquotPlate
-* **TubMedia**,**TubBlood**, **TubSybr** These are tubs where we will get the media, blood and SYBR-green respectively. We use EpMotion 30ml reservoirs for these, but you can customise as you want.
+* **TubMedia**,**TubBlood**, **TubSybr** These are tubs where we will get the media, blood and SYBR-green respectively. We use EpMotion 30ml reservoirs for these, but you can customise as you want. (TubSybr actually isn't important if you are happy to pre-load your Sybr-Green plates without using the robot.)
 
 Do edit this file to suit your preferences.
 
@@ -151,31 +153,37 @@ Note that if you have connected your device to the network you can also access t
 
 Regardless, you should get to
 
-initialview
+<p align="center">
+<img src="docs/images/initialview.png" width=500/></p>
 
 To start off click on *Create new culture plate*. 
 
 Give your plate a name, and specify its geometry.
 
-platecreation
+<p align="center">
+<img src="docs/images/platecreation.png" width=500/></p>
 
 Press Create plate and you will be returned to the home-page where you will see your first cultureplate listed.
 
-step3
+<p align="center">
+<img src="docs/images/step3.png" width=500/></p>
 
 Click on the plate.
 
-step4
+<p align="center">
+<img src="docs/images/step4.png" width=500/></p>
 
 Here you can see the current cultures on the plate (there aren't any!)
 
 Add one by typing in a name and pressing add.
 
-step5
+<p align="center">
+<img src="docs/images/step5.png" width=500/></p>
 
 There is our first culture. You can add more. You'll notice by default that the cultures are added sequentially going top-to-bottom and then left-to-right. But you can also place a culture wherever you want. Just click on a well and the next culture will be placed in that custom position instead.
 
-step6
+<p align="center">
+<img src="docs/images/step6.png" width=500/></p>
 
 Now we have our first plate!
 
