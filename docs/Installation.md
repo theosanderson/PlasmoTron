@@ -1,3 +1,6 @@
+[Home]() - [Deck setup and calibration](DeckSetupAndCalibration.md) - [PlasmoTron tutorial](DeckSetupAndCalibration.md) 
+
+
 ## Prerequisites
 
 ### Suggested hardware
