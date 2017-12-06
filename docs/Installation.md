@@ -3,27 +3,32 @@
 
 ## Prerequisites
 
-### Suggested hardware
+### Hardware
 
-#### Liquid handler
+#### Liquid handling robot
 
-We have an OT-One S Hood, sitting permanantly in a tissue culture hood. We would suggest that you get familar with calibrating and operating the OpenTrons robot using conventional protocols before you begin to try to establish PlasmoTron, because familiarity with how the robot works under the hood will be helpful.
+PlasmoTron is designed for use with OpenTrons OT One-S Hood, installed in a tissue culture hood. 
 
-While PlasmoTron could be adapted to other robotic systems this will require a little work.
+We would suggest that you get familar with calibrating and operating the OpenTrons robot using conventional protocols before you begin to try to establish PlasmoTron, because familiarity with how the robot works under the hood will be helpful.
 
-#### Server / robot handling computer
+While PlasmoTron could readily be adapted to other robotic systems (see FAQ) this will require a little work.
 
-PlasmoTron is intended to run on a dedicated computer, which will control the robot and also host the web app and database that stores culture information. This computer needs to be near enough the robot to connect by USB. It should also be networked to the internet or an intranet so that users can access their culture information remotely. It is furthermore helpful if the computer can be directly controlled (mouse, keyboard, screen), especially in the event of a network outage. The computer does not need to be powerful.
+#### Computer to control robot and host server
 
-The approach we ourselves use is to use a $40 Raspberry Pi computer, with an integrated touch screen, which is mounted to the tissue culture hood. The USB and power cables to the robot are run directly into the hood through the gasket seal (which we resealed with some Sugru). Many similar alternatives would be possible, including an i86 based tablet PC.
+PlasmoTron is intended to run on a dedicated computer, which will both control the robot and also host the web app and database that stores culture information. This computer needs to be near enough the robot to connect by USB. It should also be networked to the internet or an intranet so that users can access their culture information remotely. It is helpful if the computer can be directly controlled (mouse, keyboard, screen) from the tissue culture hood, especially in the event of a network outage. The computer does not need to be powerful.
+
+The approach we ourselves use is to use a $40 Raspberry Pi computer, with an integrated touch screen, which is mounted to the tissue culture hood. The USB and power cables to the robot are run directly into the hood through the gasket seal. Many similar alternatives would be possible, including an i86 based tablet PC.
 
 
 ### Software
 
-#### OpenTrons app
-To calibrate the positions of labware on your robot you will need to install the [OpenTrons app](https://opentrons.com/ot-app) This is trivial for many systems. For a Raspberry Pi it is rather more complex as you will need to [install from source](https://github.com/Opentrons/opentrons), but this is beyond the scope of these instructions.
+#### Operating system
+Linux and OSX should both be fine.
 
-If you have gone down the Raspberry Pi touchscreen approach, you may want to [connect remotely over VNC](https://www.raspberrypi.org/documentation/remote-access/vnc/) for calibration to allow a larger screen size.
+#### OpenTrons app
+To calibrate the positions of labware on your robot you will need to install the [OpenTrons app](https://opentrons.com/ot-app) This is trivial for many systems. For a Raspberry Pi it is rather more complex as you will need to [install from source](https://github.com/Opentrons/opentrons), describing that process is beyond the scope of these instructions.
+
+In addition if you have a small-screen for the Raspberry Pi, you may want to establish a system for [remote connection over VNC](https://www.raspberrypi.org/documentation/remote-access/vnc/) for using the OT App during calibration.
 
 #### Dependencies
 
@@ -39,7 +44,8 @@ pip install --upgrade opentrons
 ##### Flask
 [Flask](http://flask.pocoo.org/) is the lightweight web server on which PlasmoTron runs. It is a prerequisite for PlasmoTron. We have been using Flask 0.13-dev.
 
-## Installation
+## Installation of PlasmoTron
+First clone the latest stable version from GitHub.
 ```
 git clone https://github.com/theosanderson/plasmotron.git
 ```
