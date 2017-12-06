@@ -81,7 +81,7 @@ Which means the web server is now running.
 
 Fire up your browser on the machine and go to http://127.0.0.1:5000/ Hopefully you will see something like this:
 
-initialview
+<img src="docs/images/initialview.png" />
 
 If so, you should be all set in terms of installation.
 
