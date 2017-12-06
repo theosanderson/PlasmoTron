@@ -13,9 +13,9 @@ Specifically PlasmoTron provides these features:
 # Getting started
 The documentation is divided into three sections:
 
-* [Installation](docs/Installation.md) describes the pre-requisites and the set-up of both hardware and software.
-* [Deck setup and calibration](docs/DeckSetupAndCalibration.md) describes the initial calibration procedures that are required to teach the robot where you will place your labware.
-* The [PlasmoTron tutorial](docs/DeckSetupAndCalibration.md) will explain how, once this initial setup is complete, you can use PlasmoTron to maintain malaria parasites.
+* [Installation](Installation.md) describes the pre-requisites and the set-up of both hardware and software.
+* [Deck setup and calibration](DeckSetupAndCalibration.md) describes the initial calibration procedures that are required to teach the robot where you will place your labware.
+* The [PlasmoTron tutorial](DeckSetupAndCalibration.md) will explain how, once this initial setup is complete, you can use PlasmoTron to maintain malaria parasites.
 
 
 
