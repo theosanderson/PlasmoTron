@@ -31,9 +31,9 @@ The approach we ourselves use is to use a $40 Raspberry Pi computer, with an int
 ### Software
 
 #### OpenTrons app
-To calibrate the positions of labware on your robot you will need to install the [https://opentrons.com/ot-app OpenTrons app]. This is trivial for many systems. For a Raspberry Pi it is rather more complex as you will need to [https://github.com/Opentrons/opentrons install from source], but this is beyond the scope of these instructions.
+To calibrate the positions of labware on your robot you will need to install the [OpenTrons app](https://opentrons.com/ot-app) This is trivial for many systems. For a Raspberry Pi it is rather more complex as you will need to [install from source](https://github.com/Opentrons/opentrons), but this is beyond the scope of these instructions.
 
-If you have gone down the Raspberry Pi touchscreen approach, you may want to [https://www.raspberrypi.org/documentation/remote-access/vnc/ connect remotely over VNC] for calibration to allow a larger screen size.
+If you have gone down the Raspberry Pi touchscreen approach, you may want to [connect remotely over VNC](https://www.raspberrypi.org/documentation/remote-access/vnc/) for calibration to allow a larger screen size.
 
 #### Prerequisites
 
@@ -41,11 +41,11 @@ If you have gone down the Raspberry Pi touchscreen approach, you may want to [ht
 
 Your environment should be set to use Python 3.6+, which is required for OpenTrons.
 ##### OpenTrons API
-You need to install [http://docs.opentrons.com/writing.html#jupyter-notebook the OpenTrons API] which provides a package to allow the use of the OpenTrons robot in arbitrary Python scripts.
+You need to install [the OpenTrons API](http://docs.opentrons.com/writing.html#jupyter-notebook) which provides a package to allow the use of the OpenTrons robot in arbitrary Python scripts.
 
 ```
 pip install --upgrade opentrons 
 ```
 ##### Flask
-[http://flask.pocoo.org/ Flask] is the lightweight web server on which PlasmoTron runs. It is a prerequisite for PlasmoTron. We have been using Flask 0.13-dev.
+[Flask](http://flask.pocoo.org/) is the lightweight web server on which PlasmoTron runs. It is a prerequisite for PlasmoTron. We have been using Flask 0.13-dev.
 
