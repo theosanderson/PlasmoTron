@@ -1,7 +1,8 @@
 # PlasmoTron
-PlasmoTron is a robotic system built on top of the [OpenTrons](https://opentrons.com/) system, to allow semi-automated culture of malaria parasites.
+PlasmoTron is an open-source robotic system built on top of the [OpenTrons](https://opentrons.com/) platform, to allow semi-automated culture of malaria parasites.
 
-[![PlasmoTron](https://img.youtube.com/vi/9Bxmd0nfG3E-Y/0.jpg)](https://www.youtube.com/watch?v=9Bxmd0nfG3E-Y "PlasmoTron")
+
+<iframe width="560" height="420" src="http://www.youtube.com/embed/9Bxmd0nfG3E?color=white&theme=light"></iframe>
 
 Specifically PlasmoTron provides these features:
 * a database to store information about all plates currently in culture, and where individual cultures are located on them
