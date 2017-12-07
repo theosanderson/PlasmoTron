@@ -218,6 +218,7 @@ def process_plate():
     maxtips=[96,8]
     dimensions=[[12,8] , [12,1]]
     pipettenames=['p1000','p200x8']
+    tipracks=['p1000rack','p200rack']
     MeasurementPlate=None;
     MeasurementAvailableWells=[]
     def getTip(pipette):
@@ -228,7 +229,7 @@ def process_plate():
             cur = db.execute('INSERT INTO CommandQueue (Command) VALUES ("MoreTips")');
             tipcounter[pipette]=0;
         col, row =divmod(tipcounter[pipette], dimensions[pipette][1])
-        cur = db.execute('INSERT INTO CommandQueue (Command, Pipette, Labware, Row, Column) VALUES ("GetTips",?,"p1000rack",?,?)',[pipettenames[pipette],row,col])
+        cur = db.execute('INSERT INTO CommandQueue (Command, Pipette, Labware, Row, Column) VALUES ("GetTips",?,?,?,?)',[pipettenames[pipette],tipracks[pipette],row,col])
         
         tipcounter[pipette]= tipcounter[pipette]+1
     def dropTip(pipette):
@@ -371,18 +372,25 @@ def process_plate():
                 cur = dispense(0,"CulturePlate2",item[0],item[1],item[2],onexec,plateid=item[3],bottom=True)
                 dropTip(0)
          
-
     elif request.form['manual']=="dispense-sybr-green":
-    	getTip(0)
-    	curvol=0;
-    	for x in range(8):
-    		for y in range(6):
-    			if curvol<200:
-    				cur = aspirate(0,"TubSybr",1000)
-    				curvol=1000;
-    			cur = dispense(0,"AliquotPlate",200,x,y);
-    			curvol=curvol-200;
-    	dropTip(0)
+        getTip(0)
+        curvol=0;
+        for x in range(8):
+            for y in range(6):
+                if curvol<200:
+                    cur = aspirate(0,"TubSybr",1000)
+                    curvol=1000;
+                cur = dispense(0,"AliquotPlate",200,x,y);
+                curvol=curvol-200;
+        dropTip(0)
+    elif request.form['manual']=="dispense-sybr-green2":
+        getTip(1)
+        
+        for x in range(4):
+            cur = aspirate(1,"TubSybr",200)
+            cur = dispense(1,"AliquotPlate",200,0,x);
+        dropTip(1) 
+
 
     elif request.form['manual']=="feed":
         for culture in cultures:

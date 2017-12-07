@@ -13,24 +13,26 @@
 <input type=submit  value="Simulate"></form>
  </div>
 <h3>Operations</h3>
-<form action="{{ url_for('clearqueue') }}" method=post class=add-entry>
-        <input type="submit" value="Clear queue">
- </form>
-    <form action="{{ url_for('pausequeue') }}" method=post class=add-entry>
+<form action="{{ url_for('runqueue') }}" method=post class=add-entry>
+
+        <input type="submit" value="Run queue">
+        </form>
+        <form action="{{ url_for('pausequeue') }}" method=post class=add-entry>
         <input type="submit" value="Pause queue">
 
     </form>
-    <form action="{{ url_for('runqueue') }}" method=post class=add-entry>
+<form action="{{ url_for('clearqueue') }}" method=post class=add-entry>
+        <input type="submit" value="Clear queue">
+ </form>
+    
+    
 
-        <input type="submit" value="Run queue">
-
-    </form>
      <ul>
       <div style="clear:both"></div>
   {% for item in queue %}
   <li {% if item.doneAt is not none %}class="done"{% endif %} {% if item.queued == 1  %}class="inqueue"{% endif %} {% if loop.index == 1 %}
        id="first"
-    {% endif %}>{{item.Command}}  {% if item.Volume is not none %} {{item.Volume}} &mu;l  {% endif %} in {{item.Labware}} {{ formatRowColumn(item.Row,item.Column)}}</li>
+    {% endif %}>{{item.Command}}   {% if item.Volume is not none %} {{item.Volume}} &mu;l  {% endif %}  in {{item.Labware}} {{ formatRowColumn(item.Row,item.Column)}} <small>(with {{item.Pipette}})</small> </li>
       {% endfor %}
     
 

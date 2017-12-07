@@ -43,6 +43,23 @@ equipment['p1000'] = instruments.Pipette(
     trash_container=equipment['trash']
 )
 
+
+equipment['p200x8'] = instruments.Pipette(
+    name="p200x8",
+    axis="a",
+    min_volume=20,
+    max_volume=200,
+    trash_container=equipment['trash'],
+    channels=8
+)
+
+#equipment['p200x1'] = instruments.Pipette(
+#    name="p200x1",
+#    axis="a",
+#    min_volume=20,
+#    max_volume=1000,
+#    trash_container=equipment['trash']
+#)
 ############## DECK LAYOUT ENDS HERE
 
 
@@ -59,8 +76,10 @@ equipment['p1000'] = instruments.Pipette(
 if CalibrationMode:
     # Iterate through all equipment issuing a dummy command to allow calibration
     for key in equipment:
-        if key!="p1000":
+        if key!="p1000" and key !='p200x1' and key != 'p200x8':
             equipment['p1000'].move_to(equipment[key][0])
+            #equipment['p200x1'].move_to(equipment[key][0])
+            equipment['p200x8'].move_to(equipment[key][0])
 else:
     robot.home()
 
