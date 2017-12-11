@@ -67,23 +67,46 @@ First start the queue runner process by pressing "Start" on the right hand side.
 
 If anything goes wrong press Kill in the QueueRunner section. The fastest way to stop the robot is to disconnect its power supply.
 
-### Measure your plate
+### Make an aliquot plate
 
 Some days you will be content just to feed a plate, but other days you will want to assess its parasitaemia. In the PlasmoTron approach means taking a small aliquot of the culture into a separate 96 well plate that will be measured by flow cytometry (although adaptation to a SYBR-green assay or high-content microscopy are likely possible). 
 
+To do this you are going to actually need some parasites, so set up some dummy cultures of various parasitaemias in the same layout in a 24-well plate, and give them a few hours to settle in the incubator.
 
-[If you actually want to measure parasitaemia in this stage you will need to set up a fresh plate with parasites in the same wells, and let it settle.]
+Again place your culture plate in the prime position. This time put a 96-well plate in the second plate position.
 
-
-Again place your culture plate in the prime position. This time put a 96 well plate in the second plate position.
-
-You need two reservoirs this time, one for SYBR-Green (premixed to 2X concentration in PBS) and one for media.
+You need two reservoirs this time, one for SYBR Green (premixed to 2X concentration in PBS) and one for media.
 
 [Then make a new measurement plate and choose feed and aliquot]
 
-The robot will dispense SYBR green across the measurement plate and then begin work on the culture plate.
+The robot will first dispense SYBR green across the measurement plate and then begin work on the culture plate.
 
 The robot will remove spent media, replace with fresh media and then resuspend the mixture. It will then take 20ul of the mixture into the 96 well plate.
+
+
+### Measure your aliquot plate
+
+Take your aliquot plate to a flow-cytometer (taking appropriate safety measures for the fact that it contains live parasites).
+
+Load it and acquire measurements in at least forward scatter, side scatter and SYBR Green for ~10,000 parasites per well.
+
+Gate on RBCs in the FSC and SSC channels, then split this population into infected and uninfected cells in the SYBR-Green channel.
+
+If you happen to have a BD CytoFlex you can find a template here.
+
+Ultimately you need to export, either from your cytometer software or from downstream processing, a file which has well identifiers ("A1", "A2", etc,.) in one column and parasitaemia measurements in another. By default the software expects column 0 (the first column) to contain identifiers and column 7 (the 8th column) to contain parasitaemias but you can alter this by amending the configuration at the top of `app.py`.
+
+Once the configuration is set appropriately (and the app restarted if need be), visit http://[server's IP address here]:5000/ on the cytometer computer to bring up PlasmoTron. On the home page, click on the MeasurementPlate which you created (which should now have been populated). Scroll to the bottom and press `Browse`, to find your CSV file. Then press `Upload readings`.
+
+Readings for this measurement plate have now been captured. The plate will also be set to a finished state, meaning that the next time you attempt to take an aliquot the system will expect you to create a new plate. (Many culture plates can be measured as a batch on a single measurement plate.)
+
+You can now click on `Cultures` in the top right of the PlasmoTron display. You will be presented with a list of your cultures ordered in descending order by parasitaemia. This ordering helps you to see which cultures might urgently need splitting. Note that the parasitaemia on this page is the expected parasitaemia *right now*, taking account of the fact that the parasites were actually removed from culture perhaps an hour ago. If you refresh this page, you may see the parasitaemia rising in front of your eyes. You can set the expected growth rate in the `app.py` configuration section.
+
+The other way to check parasitaemia data is to navigate on your plate and click on each culture in turn. 
+
+### Split your parasites
+
+Take your aliquot plate to a flow-cytometer (taking appropriate safety measures for the fact that it contains live parasites).
 
 
 

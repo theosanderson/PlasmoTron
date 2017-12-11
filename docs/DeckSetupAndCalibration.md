@@ -25,10 +25,10 @@ The other part we could change is `"epmotion30"`. This defines the type of conta
 OpenTrons has a whole lot of [built-in containers](http://docs.opentrons.com/containers.html). You can see them all [here](https://andysigler.github.io/ot-api-containerviz/). You can also add your own containers, which we did in this case at the top with:
 
 ```{python}
-containers.create("24corning",grid=(4,6),spacing=(19.304,19.304),diameter=16.26,depth=18) #24-well plate
+containers.create("24corning", grid=(4,6), spacing=(19.304,19.304), diameter=16.26,depth=18) #24-well plate
 ```
 
-It is important that the deck layout section defines these key components.
+It is important that the deck layout section defines these key components:
 
 * **Tipbox** Where the pipette goes to collect a new tip
 * **Trash** This is defined as a point in space, which should be over your trash container (the bigger the better)
@@ -53,3 +53,5 @@ But hopefully no errors occur and you are presented with a screen something like
 Now proceed to calibrate as described in the [OpenTrons documentation](https://support.opentrons.com/getting-started/software-setup/calibrating-the-deck), until every item of equipment you need to use has a green tick. 
 
 We're now ready to close the OpenTrons app and open up the web application. If the calibration is correct we will never need the OpenTrons app again.
+
+Next up you can get to grips with PlasmoTron itself in the [tutorial](Tutorial.md).
