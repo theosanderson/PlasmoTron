@@ -18,7 +18,7 @@ if not CalibrationMode:
     dbd = sqlite3.connect('flaskr.db', timeout=100000)
 
 ############## DECK LAYOUT BEGINS HERE
-#CONTAINERS:
+#CONTAINER DEFINITIONS:
 containers.create("epmotion30",grid=(8,1),spacing=(9.02,9.02),diameter=10,depth=55) #EpMotion Reservoir
 containers.create("24corning",grid=(4,6),spacing=(19.304,19.304),diameter=16.26,depth=18) #24-well plate
 
@@ -97,9 +97,6 @@ else:
         else:
             if command['Command']=="Home":
                 robot.home()
-            if command['Command']=="ResuspendReservoir":
-                robot.home()
-                #toadd
             if command['Command']=="Aspirate":
                 if command['Row'] is not None:
                     location=equipment[command['Labware']].cols(int(command['Row'])).wells(int(command['Column']))
@@ -120,6 +117,11 @@ else:
                     raise Exception("Where are tips?") 
 
                 equipment[command['Pipette']].pick_up_tip(location)
+            if command['Command']=="ResuspendReservoir":
+                for i in range(8):
+                    equipment[command['Pipette']].aspirate(1000,equipment[command['Labware']][i],rate=2)
+                    equipment[command['Pipette']].dispense(1000,equipment[command['Labware']][i],rate=2)
+
             if command['Command']=="Resuspend" or command['Command']=="ResuspendDouble":
                 if command['Row'] is not None:
                     location=equipment[command['Labware']].cols(int(command['Row'])).wells(int(command['Column']))
@@ -129,36 +131,36 @@ else:
 
                 well_edge = location.from_center(x=0.5,y=0,z=-1)
                 destination = (location, well_edge)
-                equipment[command['Pipette']].aspirate(700,destination,rate=1)
+                equipment[command['Pipette']].aspirate(700,destination,rate=1.8)
                 equipment[command['Pipette']].dispense(700,destination,rate=2)
                 well_edge = location.from_center(x=0,y=0.5,z=-1)
                 destination = (location, well_edge)
-                equipment[command['Pipette']].aspirate(700,destination,rate=1)
+                equipment[command['Pipette']].aspirate(700,destination,rate=1.8)
                 equipment[command['Pipette']].dispense(700,destination,rate=2)
                 well_edge = location.from_center(x=-0.5,y=0,z=-1)
                 destination = (location, well_edge)
-                equipment[command['Pipette']].aspirate(700,destination,rate=1)
+                equipment[command['Pipette']].aspirate(700,destination,rate=1.8)
                 equipment[command['Pipette']].dispense(700,destination,rate=2)
                 well_edge = location.from_center(x=0,y=-0.5,z=-1)
                 destination = (location, well_edge)
-                equipment[command['Pipette']].aspirate(700,destination,rate=1)
+                equipment[command['Pipette']].aspirate(700,destination,rate=1.8)
                 equipment[command['Pipette']].dispense(700,destination,rate=2)
                 if command['Command']=="ResuspendDouble":
                     well_edge = location.from_center(x=0.35,y=0.35,z=-1)
                     destination = (location, well_edge)
-                    equipment[command['Pipette']].aspirate(700,destination,rate=1)
+                    equipment[command['Pipette']].aspirate(700,destination,rate=1.8)
                     equipment[command['Pipette']].dispense(700,destination,rate=2)
                     well_edge = location.from_center(x=-0.35,y=-0.35,z=-1)
                     destination = (location, well_edge)
-                    equipment[command['Pipette']].aspirate(700,destination,rate=1)
+                    equipment[command['Pipette']].aspirate(700,destination,rate=1.8)
                     equipment[command['Pipette']].dispense(700,destination,rate=2)
                     well_edge = location.from_center(x=-0.35,y=.35,z=-1)
                     destination = (location, well_edge)
-                    equipment[command['Pipette']].aspirate(700,destination,rate=1)
+                    equipment[command['Pipette']].aspirate(700,destination,rate=1.8)
                     equipment[command['Pipette']].dispense(700,destination,rate=2)
                     well_edge = location.from_center(x=.35,y=-0.35,z=-1)
                     destination = (location, well_edge)
-                    equipment[command['Pipette']].aspirate(700,destination,rate=1)
+                    equipment[command['Pipette']].aspirate(700,destination,rate=1.8)
                     equipment[command['Pipette']].dispense(700,destination,rate=2)
                 
             if command['Command']=="Dispense":

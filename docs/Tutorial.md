@@ -17,36 +17,36 @@ Note that if you have connected your device to the network you can also access t
 Regardless, you should get to
 
 <p align="center">
-<img src="docs/images/initialview.png" width=500/></p>
+<img src="images/initialview.png" width=500/></p>
 
 To start off click on *Create new culture plate*. 
 
 Give your plate a name ("tutorial plate"?), and specify its geometry (for this one use a 24-well).
 
 <p align="center">
-<img src="docs/images/platecreation.png" width=500/></p>
+<img src="images/platecreation.png" width=500/></p>
 
 Press **Create plate** and you will be returned to the home-page where you will see your first cultureplate listed.
 
 <p align="center">
-<img src="docs/images/step3.png" width=500/></p>
+<img src="images/step3.png" width=500/></p>
  
 Click on the plate. Here you can see the current cultures on the plate (there aren't any!)
 
 <p align="center">
-<img src="docs/images/step4.png" width=500/></p>
+<img src="images/step4.png" width=500/></p>
 
 
 
 Add one by typing in a name and pressing add.
 
 <p align="center">
-<img src="docs/images/step5.png" width=500/></p>
+<img src="images/step5.png" width=500/></p>
 
 There is our first culture. You can add more. You will notice by default that the cultures are added sequentially going top-to-bottom and then left-to-right. But you can also place a culture wherever you want - just click on a well before pressing *Add culture* and the next culture will be placed in that custom position instead.
 
 <p align="center">
-<img src="docs/images/step6.png" width=500/></p>
+<img src="images/step6.png" width=500/></p>
 
 So we now have our first plate!
 

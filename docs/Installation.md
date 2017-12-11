@@ -9,7 +9,7 @@
 
 PlasmoTron is designed for use with OpenTrons OT One-S Hood, installed in a tissue culture hood. 
 
-We would suggest that you get familar with calibrating and operating the OpenTrons robot using conventional protocols before you begin to try to establish PlasmoTron, because familiarity with how the robot works under the hood will be helpful.
+We would suggest that you get familar with calibrating and operating the OpenTrons robot using conventional protocols before you try to establish PlasmoTron, because familiarity with how the robot works will be helpful.
 
 While PlasmoTron could readily be adapted to other robotic systems (see FAQ) this will require a little work.
 
@@ -17,7 +17,7 @@ While PlasmoTron could readily be adapted to other robotic systems (see FAQ) thi
 
 PlasmoTron is intended to run on a dedicated computer, which will both control the robot and also host the web app and database that stores culture information. This computer needs to be near enough the robot to connect by USB. It should also be networked to the internet or an intranet so that users can access their culture information remotely. It is helpful if the computer can be directly controlled (mouse, keyboard, screen) from the tissue culture hood, especially in the event of a network outage. The computer does not need to be powerful.
 
-The approach we ourselves use is to use a $40 Raspberry Pi computer, with an integrated touch screen, which is mounted to the tissue culture hood. The USB and power cables to the robot are run directly into the hood through the gasket seal. Many similar alternatives would be possible, including an i86 based tablet PC.
+The approach we ourselves use is to use a $40 Raspberry Pi computer, with an integrated touch screen, which is mounted to outside of the tissue culture hood. The USB and power cables to the robot are run directly into the hood through the gasket seal. Many similar alternatives would be possible, including an i86-based tablet PC.
 
 
 ### Software
@@ -26,9 +26,9 @@ The approach we ourselves use is to use a $40 Raspberry Pi computer, with an int
 Linux and OSX should both be fine.
 
 #### OpenTrons app
-To calibrate the positions of labware on your robot you will need to install the [OpenTrons app](https://opentrons.com/ot-app) This is trivial for many systems. For a Raspberry Pi it is rather more complex as you will need to [install from source](https://github.com/Opentrons/opentrons), describing that process is beyond the scope of these instructions.
+To calibrate the positions of labware on your robot you will need to install the [OpenTrons app](https://opentrons.com/ot-app) This is trivial for many systems. For a Raspberry Pi it is rather more complex as you will need to [install from source](https://github.com/Opentrons/opentrons) - describing that process is beyond the scope of these instructions.
 
-In addition if you have a small-screen for the Raspberry Pi, you may want to establish a system for [remote connection over VNC](https://www.raspberrypi.org/documentation/remote-access/vnc/) for using the OT App during calibration.
+In addition if you have a small-screen for the Raspberry Pi, you may want to establish a system for [remote connection over VNC](https://www.raspberrypi.org/documentation/remote-access/vnc/) to simplify use of the OT App during calibration.
 
 #### Dependencies
 

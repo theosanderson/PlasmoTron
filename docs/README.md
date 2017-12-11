@@ -6,12 +6,12 @@ PlasmoTron is an open-source robotic system built on top of the [OpenTrons](http
 
 Specifically PlasmoTron provides these features:
 * a database to store information about all plates currently in culture, and where individual cultures are located on them
-* a system to control an OpenTrons robot in order to feed these parasites, split them, and/or take an aliquot to measure parasitaemia by SYBR-green flow cytometry
+* an interface to control an OpenTrons robot in order to feed these parasites, split them, and/or take an aliquot to measure parasitaemia by SYBR-green flow cytometry
 * the ability to upload the results from a flow cytometer to the database and have them associated with each culture at a specific time.
 * an intelligent system to use this parasitaemia data to decide how to split parasites
 
 # Development status
-PlasmoTron is not a commercial product. It is a system we have built in the lab to simplify our own culture, and which we offer to others in case it is helpful. PlasmoTron remains under active development and new features continue to be integrated. Please feel free to [get in touch](mailto:ts10@sanger.ac.uk) to discuss whether PlasmoTron is likely to be suitable to you in and your skillsets in its current iteration.
+PlasmoTron is not a commercial product. It is a system we have built in the lab to simplify our own culture, and which we offer to others in case it is helpful. PlasmoTron remains under active development and new features continue to be integrated. Please feel free to [get in touch](mailto:ts10@sanger.ac.uk) to discuss whether PlasmoTron is likely to be suitable for you in its current iteration.
 
 
 # Getting started
