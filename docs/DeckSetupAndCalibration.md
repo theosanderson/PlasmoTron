@@ -20,7 +20,7 @@ equipment['TubMedia']=containers.load('epmotion30', "D1","TubMedia")
 ```
 The bit on the left-hand-side defines that this is a new piece of equipment called `"TubMedia"`. That name is hardcoded into other parts of the programme so you don't want to change it. There are two parts you can safely change. One is the second argument of the load function, currently `"D1"` which specifies where on the deck the container is to be found. Feel free to change these values as you wish.
 
-The other part we could change is `"epmotion30"`, this defines the type of container that is being used which determines its geometry.
+The other part we could change is `"epmotion30"`. This defines the type of container that is being used which determines its geometry.
 
 OpenTrons has a whole lot of [built-in containers](http://docs.opentrons.com/containers.html). You can see them all [here](https://andysigler.github.io/ot-api-containerviz/). You can also add your own containers, which we did in this case at the top with:
 
