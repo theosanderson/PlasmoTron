@@ -1,18 +1,20 @@
+ <div style="float:right">
+  <h3 style="margin:0;margin-bottom:1em;">Queue runner</h3>
+{% if status == "Crashed" %}<p>{{status}}</p> {% endif %}
+<form action="/killQueueProcessor" method="post" >
+<input type=submit value="Kill"></form>
+<form action="/restartQueueProcessor" method="post">
+{%if status != "running" %}<input type=submit  value="{%if status == "Crashed" %}Restart {% endif %}{%if status == "notstarted" %}Start {% endif %}"></form> {% endif %}
+{% if simulate==1 %}
+<form action="/restartQueueProcessor" method="post"><input type="hidden" name="simulate" value="yes" />
+<input type=submit  value="Simulate"></form>{% endif %}
+ </div>
  {% if queue|length>0  and queue[0].queued ==1  %}
 <div class="robotwarn">
 <img src="/static/HR002.png" height=30>Caution. Robot in use.</div>
  {% endif %}
- <div style="float:right">
-  <h3>Queue runner</h3>
-<p>{{status}}</p>
-<form action="/killQueueProcessor" method="post" >
-<input type=submit value="Kill"></form>
-<form action="/restartQueueProcessor" method="post">
-<input type=submit  value="Restart"></form>
-<form action="/restartQueueProcessor" method="post"><input type="hidden" name="simulate" value="yes" />
-<input type=submit  value="Simulate"></form>
- </div>
-<h3>Operations</h3>
+ 
+<h3 style="margin-bottom:1em">Operations</h3>
 <form action="{{ url_for('runqueue') }}" method=post class=add-entry>
 
         <input type="submit" value="Run queue">

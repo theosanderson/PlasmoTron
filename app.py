@@ -257,6 +257,20 @@ def process_plate():
             onexecute="INSERT INTO Actions (PlateID,Row,Column,TypeOfOperation,ActionTime,ValueOfOperation) VALUES ("+str(plateid)+","+str(platerow)+","+str(platecol)+",'"+action+"',"+"<time>,"+str(actionValue)+")";
 
         return(onexecute)
+    def generateMultiDispense(source,destwells):
+                
+        curvol=0;
+        getTip(0)
+        for well in destwells:
+            (plate,row,col)=well
+            if curvol<200:
+                cur = aspirate(0,"TubSybr",1000)
+                curvol=1000;
+            cur = dispense(0,"AliquotPlate",200,row,col);
+            curvol=curvol-200;
+        dropTip(0)
+
+        
     def getNextMeasurementWell():
         nonlocal MeasurementAvailableWells
         nonlocal MeasurementPlate
@@ -325,7 +339,7 @@ def process_plate():
             splitcultures=calcExpectedParasitaemas(splitcultures)
             desiredParasitaemia=float(request.form['parasitaemia'])
             if not (desiredParasitaemia >0 and desiredParasitaemia <101):
-            	return ("Error, enter reasonable parasitaemia")
+                return ("Error, enter reasonable parasitaemia")
             addback=[]
             for culture in splitcultures:
                 if culture['expectednow'] > desiredParasitaemia:
@@ -409,7 +423,16 @@ def process_plate():
         cur = db.execute('INSERT INTO CommandQueue (Command) VALUES ("Home")')
     elif request.form['manual']=="feedandaliquot" or request.form['manual']=="justaliquot":
         cur = db.execute('INSERT INTO CommandQueue (Command, Labware, LabwareType,Slot) VALUES ("InitaliseLabware","AliquotPlate","96-flat","C1")')
+        alwells=[]
+        culwells=[]
         for culture in cultures:
+            (alplate,alrow,alcol)=getNextMeasurementWell();
+            alwells.append([alplate,alrow,alcol])
+            culwells.append([culture['Row'],culture['Column']])
+        generateMultiDispense("TubSybr",alwells);
+        for i in range(len(culwells)):
+            culwell=culwells[i]
+            (alplate,alrow,alcol)=alwells[i]
             getTip(0)
             if request.form['manual']=="feedandaliquot":
                 cur = aspirate(0,"CulturePlate",feedVolume+extraRemoval,culture['Row'],culture['Column'],request.form['plateid'])
@@ -417,10 +440,10 @@ def process_plate():
                 dropTip(0)
                 getTip(0)
                 cur = aspirate(0,"TubMedia",feedVolume)
-                onexec=createOnExecute("feed",request.form['plateid'],culture['Row'],culture['Column'])
-                cur = dispense(0,"CulturePlate",feedVolume,culture['Row'],culture['Column'],onexec,plateid=request.form['plateid'],bottom=True)
-            cur = resuspend(0,"CulturePlate",resuspvol,culture['Row'],culture['Column'],plateid=request.form['plateid'])
-            cur = aspirate(0,"CulturePlate",aliquotvol,culture['Row'],culture['Column'],plateid=request.form['plateid'])
+                onexec=createOnExecute("feed",request.form['plateid'],culwell[0],culwell[1])
+                cur = dispense(0,"CulturePlate",feedVolume,culwell[0],culwell[1],onexec,plateid=request.form['plateid'],bottom=True)
+            cur = resuspend(0,"CulturePlate",resuspvol,culwell[0],culwell[1],plateid=request.form['plateid'])
+            cur = aspirate(0,"CulturePlate",aliquotvol,culwell[0],culwell[1],plateid=request.form['plateid'])
             (alplate,alrow,alcol)=getNextMeasurementWell();
             if(alplate==-1):
                 flash("Please add a new measurement plate")
@@ -668,7 +691,7 @@ def killQueueProcessor():
             except OSError as e:
                flash("Terminated gracefully")
 
-        return redirect(url_for('show_plates'))
+        return redirect(url_for('view_refreshed'))
     
 
 @app.route('/restartQueueProcessor', methods=['POST'])

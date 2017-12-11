@@ -102,19 +102,15 @@ Readings for this measurement plate have now been captured. The plate will also 
 
 You can now click on `Cultures` in the top right of the PlasmoTron display. You will be presented with a list of your cultures ordered in descending order by parasitaemia. This ordering helps you to see which cultures might urgently need splitting. Note that the parasitaemia on this page is the expected parasitaemia *right now*, taking account of the fact that the parasites were actually removed from culture perhaps an hour ago. If you refresh this page, you may see the parasitaemia rising in front of your eyes. You can set the expected growth rate in the `app.py` configuration section.
 
-The other way to check parasitaemia data is to navigate on your plate and click on each culture in turn. 
+The other way to check parasitaemia data is to navigate to your plate and click on each culture in turn. This will display the first point of what will become a graph of parasitaemia data over time.
 
 ### Split your parasites
 
-Take your aliquot plate to a flow-cytometer (taking appropriate safety measures for the fact that it contains live parasites).
+Back on the `Cultures` display, if you see that some of your cultures are above the parasitaemia you want, you may want to split them. To do this open the plate containing these cultures and choose `Split` at the bottom. You will be asked to specify the maximum parasitaemia you want to exist on the plate.
 
+Again place the culture plate on the primary position. You will also need to supply some blood-media mix at the same haematocrit as your culture (we use 2% haematocrit) in the TubBlood position.
 
+Tip: if you want to achieve a very large dilution in a split it may be prudent to split to a new plate. This is because it is rarely possible to resuspend every single little bit of the culture, which may result in less dilution than you expect in extreme cases.
 
-
-
-
-
-
-
-
+### Split your parasites
 
