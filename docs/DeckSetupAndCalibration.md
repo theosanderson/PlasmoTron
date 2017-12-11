@@ -41,7 +41,7 @@ Do edit this file to suit your preferences.
 
 When you are done, save it.
 
-Now we are ready to calibrate. Load up the OpenTrons app. Press *Click to upload* and navigate to the plasmotron directory. Open the queueprocessor.py file.
+Now we are ready to calibrate. Load up the OpenTrons app. Press *Click to upload* and navigate to the plasmotron directory. Open the `queueprocessor.py` file.
 
 If any sort of error occurs you have probably introduced an error while modifying the Deck Setup. You may want to revert to the [original file](https://github.com/theosanderson/plasmotron/blob/master/queueprocessor.py) and slowly make changes until you find the source of the problem.
 
