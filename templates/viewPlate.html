@@ -6,7 +6,7 @@
       <h3>Define a new culture and add to this plate</h3>
       <dl>
         <dt>Culture name:
-        <dd><input type=text size=30 name=title>
+        <dd><input type=text size=30 name=title id=title>
      <input type=hidden size=30 name=plateID value="{{plate.PlateID}}"> <input name="row" style="width:20px;" id="row"><input name="col" style="width:20px;" id="col"><input value="Add" type="submit">
       </dl>
     </form>
@@ -41,6 +41,8 @@
         Tips used (P1000):<input name="tips1000" id="tip1000" value="0"/>
            Max parasitaemia:<input name="parasitaemia" id="parasitaemia" value="0"/>
       <script>  
+        if($('.flash')){
+        $('#title').focus();}
             $.fn.numpad.defaults.gridTpl = '<table class="table modal-content"></table>';
       $.fn.numpad.defaults.backgroundTpl = '<div class="backdrop"></div>';
       $.fn.numpad.defaults.displayTpl = '<input type="text" class="form-control" />';

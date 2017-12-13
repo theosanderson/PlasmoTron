@@ -27,6 +27,7 @@ equipment['trash']=containers.load('point', "C1","trash")
 equipment['p200rack'] = containers.load('tiprack-200ul', 'E2', 'tiprack200')
 equipment['p1000rack']  = containers.load('tiprack-1000ulT', 'A1', 'tiprack1000T')
 equipment['CulturePlate']  = containers.load('24corning', 'B2', 'CulturePlate24')
+equipment['CulturePlate96']  = containers.load('96-flat', 'B2')
 equipment['CulturePlate2']  = containers.load('24corning', 'C2', 'CulturePlate242')
 equipment['AliquotPlate']  = containers.load('96-flat', 'C2', 'AliquotPlate')
 equipment['TubBlood']=containers.load('epmotion30', "D1","TubBlood")
@@ -95,6 +96,10 @@ else:
             time.sleep(0.1)
             #print("none")
         else:
+            if command['Command']=="MoreTips":
+                    #todo prompt for more tips, for now will just pause queue
+                    db.execute('UPDATE CommandQueue SET queued=0 WHERE queued=1')
+                    dbd.commit()
             if command['Command']=="Home":
                 robot.home()
             if command['Command']=="Aspirate":

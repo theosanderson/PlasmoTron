@@ -215,7 +215,7 @@ def add_manual_action():
 @app.route('/processplate', methods=['POST'])
 def process_plate():
     tipcounter=[int(request.form['tips1000']),int(request.form['tips200'])]
-    maxtips=[96,8]
+    maxtips=[96,12]
     dimensions=[[12,8] , [12,1]]
     pipettenames=['p1000','p200x8']
     tipracks=['p1000rack','p200rack']
@@ -241,7 +241,9 @@ def process_plate():
             cur = db.execute('INSERT INTO CommandQueue (Command, Pipette, Volume, Labware, Row, Column,OnCompletion,PlateID) VALUES ("DispenseBottom",?,?,?,?,?,?,?)',[pipettenames[pipette],volume,labware,row,col,oncompletion,plateid])
         else:
             cur = db.execute('INSERT INTO CommandQueue (Command, Pipette, Volume, Labware, Row, Column,OnCompletion,PlateID) VALUES ("Dispense",?,?,?,?,?,?,?)',[pipettenames[pipette],volume,labware,row,col,oncompletion,plateid])
-    
+    def resuspendReservoir(pipette,labware):
+        cur = db.execute('INSERT INTO CommandQueue (Command, Pipette,  Labware) VALUES (?,?,?)',["resuspendReservoir",pipettenames[pipette],labware])
+   
     def resuspend(pipette,labware,volume,row=None,col=None,plateid=None,double=False):
         if double==False:
             Command="Resuspend"
@@ -308,7 +310,7 @@ def process_plate():
     cur = db.execute('SELECT * FROM CommandQueue WHERE doneAt IS NULL')
     if(cur.fetchone() != None):
         flash('Please clear the queue first')
-        return redirect(url_for('view_queue'))
+        return redirect(url_for('view_refreshed'))
     cur = db.execute('SELECT PlateRows,PlateCols,PlateClass FROM Plates INNER JOIN PlateClasses ON Plates.PlateClass= PlateClasses.PlateClassID WHERE PlateID= ?',[request.form['plateid']])
     platestats=cur.fetchone();
 
@@ -352,6 +354,7 @@ def process_plate():
                     dropTip(0)
                     addback.append([amountToRemove,culture['Row'],culture['Column'],request.form['plateid'],factor])
             getTip(0)
+            resuspendReservoir(0,"TubBlood")
             for item in addback:
                 cur = aspirate(0,"TubBlood",item[0])
                 onexec=createOnExecute("split",request.form['plateid'],item[1],item[2],item[4])
@@ -367,6 +370,7 @@ def process_plate():
                 return ("Error, enter reasonable parasitaemia")
             addback=[]
             getTip(0)
+            resuspendReservoir(0,"TubBlood")
             for culture in splitcultures:
                 if culture['expectednow'] > desiredParasitaemia:
                     factor=desiredParasitaemia/culture['expectednow']
@@ -407,20 +411,38 @@ def process_plate():
 
 
     elif request.form['manual']=="feed":
-        for culture in cultures:
+        if platestats['PlateClass']==1:
+            for culture in cultures:
+                getTip(0)
+                cur = aspirate(0,"CulturePlate",feedVolume+extraRemoval,culture['Row'],culture['Column'],plateid=request.form['plateid'])
+               # cur = db.execute('INSERT INTO CommandQueue (Command, Volume, Labware) VALUES ("Dispense",?,"Trash")',[feedVolume+extraRemoval])
+                dropTip(0)
             getTip(0)
-            cur = aspirate(0,"CulturePlate",feedVolume+extraRemoval,culture['Row'],culture['Column'],plateid=request.form['plateid'])
-           # cur = db.execute('INSERT INTO CommandQueue (Command, Volume, Labware) VALUES ("Dispense",?,"Trash")',[feedVolume+extraRemoval])
+            for culture in cultures:
+                
+                cur = aspirate(0,"TubMedia",feedVolume)
+                onexec=createOnExecute("feed",request.form['plateid'],culture['Row'],culture['Column'])
+                cur = dispense(0,"CulturePlate",feedVolume,culture['Row'],culture['Column'],onexec,plateid=request.form['plateid'])
+               
             dropTip(0)
-        getTip(0)
-        for culture in cultures:
-            
-            cur = aspirate(0,"TubMedia",feedVolume)
-            onexec=createOnExecute("feed",request.form['plateid'],culture['Row'],culture['Column'])
-            cur = dispense(0,"CulturePlate",feedVolume,culture['Row'],culture['Column'],onexec,plateid=request.form['plateid'])
-           
-        dropTip(0)
-        cur = db.execute('INSERT INTO CommandQueue (Command) VALUES ("Home")')
+            cur = db.execute('INSERT INTO CommandQueue (Command) VALUES ("Home")')
+        elif platestats['PlateClass']==0:
+            rows={}
+            for culture in cultures:
+                row=culture['Column']
+                rows[row]=1
+            rows=rows.keys()
+            for row in rows:
+                getTip(1)
+                cur = aspirate(1,"CulturePlate96",feedVolume,0,row)
+                cur = dispense(1,"trash",feedVolume)
+                dropTip(1)
+            getTip(1)
+            for row in rows:
+                cur = aspirate(1,"TubMedia",feedVolume)
+                cur = dispense(1,"CulturePlate96",feedVolume,0,row)
+            dropTip(1)
+            cur = db.execute('INSERT INTO CommandQueue (Command) VALUES ("Home")')
     elif request.form['manual']=="feedandaliquot" or request.form['manual']=="justaliquot":
         cur = db.execute('INSERT INTO CommandQueue (Command, Labware, LabwareType,Slot) VALUES ("InitaliseLabware","AliquotPlate","96-flat","C1")')
         alwells=[]

@@ -5,7 +5,7 @@
 <input type=submit value="Kill"></form>
 <form action="/restartQueueProcessor" method="post">
 {%if status != "running" %}<input type=submit  value="{%if status == "Crashed" %}Restart {% endif %}{%if status == "notstarted" %}Start {% endif %}"></form> {% endif %}
-{% if simulate==1 %}
+{% if 1==1 %}
 <form action="/restartQueueProcessor" method="post"><input type="hidden" name="simulate" value="yes" />
 <input type=submit  value="Simulate"></form>{% endif %}
  </div>
@@ -34,7 +34,7 @@
   {% for item in queue %}
   <li {% if item.doneAt is not none %}class="done"{% endif %} {% if item.queued == 1  %}class="inqueue"{% endif %} {% if loop.index == 1 %}
        id="first"
-    {% endif %}>{{item.Command}}   {% if item.Volume is not none %} {{item.Volume}} &mu;l  {% endif %}  in {{item.Labware}} {{ formatRowColumn(item.Row,item.Column)}} <small>(with {{item.Pipette}})</small> </li>
+    {% endif %}>{{item.Command}}   {% if item.Volume is not none %} {{item.Volume}} &mu;l  {% endif %}  in {{item.Labware}} {% if item.LabwareType is not none %}{{item.LabwareType}} {% endif %}  {{ formatRowColumn(item.Row,item.Column)}} <small>(with {{item.Pipette}})</small> </li>
       {% endfor %}
     
 
