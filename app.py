@@ -19,19 +19,19 @@ ALLOWED_EXTENSIONS = set(['csv'])
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
 app = Flask(__name__) # create the application instance :)
-app.config.from_object(__name__) # load config from this file , flaskr.py
+app.config.from_object(__name__) # load config from this file 
 queueProcessor="beginning";
 
 InitCommand=0
 # Load default config and override config from an environment variable
 app.config.update(dict(
-    DATABASE=os.path.join(app.root_path, 'flaskr.db'),
+    DATABASE=os.path.join(app.root_path, 'plasmotron.db'),
     SECRET_KEY='development key',
     USERNAME='admin',
     PASSWORD='default',
     DEBUG=True
 ))
-app.config.from_envvar('FLASKR_SETTINGS', silent=True)
+app.config.from_envvar('PLASMOTRON_SETTINGS', silent=True)
 import string
 numberstoletters = dict(enumerate(string.ascii_uppercase, 1))
 def reverseRowColumn(cell):
@@ -195,10 +195,16 @@ def add_culture():
 def add_plate():
 
     db = get_db()
-    db.execute('insert into Plates (PlateName,PlateClass,PlateFinished,PlatePurpose) values (?,?,0,1)',
+    title=request.form['title'].strip()
+    if len(title)>0:
+        db.execute('insert into Plates (PlateName,PlateClass,PlateFinished,PlatePurpose) values (?,?,0,1)',
                  [request.form['title'],request.form['class']])
-    db.commit()
-    flash('New plate was successfully added')
+        db.commit()
+        flash('New plate was successfully added')
+    else:
+        flash('Please enter a name for your plate.')
+
+    
     return redirect(url_for('show_plates'))
 
 @app.route('/addmanualaction', methods=['POST'])
