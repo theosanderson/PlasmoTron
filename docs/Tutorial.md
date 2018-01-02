@@ -110,6 +110,3 @@ Back on the `Cultures` display, if you see that some of your cultures are above 
 Again place the culture plate on the primary position. You will also need to supply some blood-media mix at the same haematocrit as your culture (we use 2% haematocrit) in the TubBlood position.
 
 Tip: if you want to achieve a very large dilution in a split it may be prudent to split to a new plate. This is because it is rarely possible to resuspend every single little bit of the culture, which may result in less dilution than you expect in extreme cases.
-
-### Split your parasites
-
