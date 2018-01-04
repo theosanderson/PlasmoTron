@@ -463,7 +463,7 @@ def process_plate():
             (alplate,alrow,alcol)=alwells[i]
             getTip(0)
             if request.form['manual']=="feedandaliquot":
-                cur = aspirate(0,"CulturePlate",feedVolume+extraRemoval,culture['Row'],culture['Column'],request.form['plateid'])
+                cur = aspirate(0,"CulturePlate",feedVolume+extraRemoval,culwell[0],culwell[1],request.form['plateid'])
                 airgap(0)
                 dropTip(0)
                 getTip(0)
@@ -472,7 +472,7 @@ def process_plate():
                 cur = dispense(0,"CulturePlate",feedVolume,culwell[0],culwell[1],onexec,plateid=request.form['plateid'],bottom=True)
             cur = resuspend(0,"CulturePlate",resuspvol,culwell[0],culwell[1],plateid=request.form['plateid'])
             cur = aspirate(0,"CulturePlate",aliquotvol,culwell[0],culwell[1],plateid=request.form['plateid'])
-            (alplate,alrow,alcol)=getNextMeasurementWell();
+         
             if(alplate==-1):
                 flash("Please add a new measurement plate")
                 return redirect(url_for('show_plates'))
