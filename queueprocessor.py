@@ -15,7 +15,7 @@ if not CalibrationMode:
     import sqlite3
     import time
     import string
-    dbd = sqlite3.connect('flaskr.db', timeout=100000)
+    dbd = sqlite3.connect('plasmotron.db', timeout=100000)
 
 ############## DECK LAYOUT BEGINS HERE
 #CONTAINER DEFINITIONS:
