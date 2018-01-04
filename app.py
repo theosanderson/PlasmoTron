@@ -456,7 +456,7 @@ def process_plate():
         for culture in cultures:
             (alplate,alrow,alcol)=getNextMeasurementWell();
             alwells.append([alplate,alrow,alcol])
-            culwells.append([culture['Row'],culture['Column']])
+            culwells.append([culture['Row'],culture['Column'],culture['CultureID']])
         generateMultiDispense("TubSybr",alwells);
         for i in range(len(culwells)):
             culwell=culwells[i]
@@ -476,7 +476,7 @@ def process_plate():
             if(alplate==-1):
                 flash("Please add a new measurement plate")
                 return redirect(url_for('show_plates'))
-            onexecute="INSERT INTO PlatePositions (PlateID,Row,Column,CultureID,timeSampled) VALUES ("+str(alplate)+","+str(alrow)+","+str(alcol)+","+str(culture['CultureID'])+","+"<time>)";
+            onexecute="INSERT INTO PlatePositions (PlateID,Row,Column,CultureID,timeSampled) VALUES ("+str(alplate)+","+str(alrow)+","+str(alcol)+","+str(culwell[2])+","+"<time>)";
             cur = dispense(0,"AliquotPlate",aliquotvol,alrow,alcol,onexecute,alplate,bottom=True)
             cur = aspirate(0,"AliquotPlate",100,alrow,alcol,plateid=alplate)
             cur = dispense(0,"AliquotPlate",100,alrow,alcol,plateid=alplate,bottom=True)
