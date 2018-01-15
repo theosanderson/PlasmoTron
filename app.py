@@ -387,6 +387,11 @@ def process_plate():
                     cur = dispense(0,"CulturePlate2",amountOfNewBlood,culture['Row'],culture['Column'],plateid=request.form['plateid'])
                    
                     addback.append([amountToTransfer,culture['Row'],culture['Column'],request.form['plateid'],factor])
+                else:
+                    factor=1
+                    amountToTransfer=(factor)*fullVolume
+                    amountOfNewBlood=(1-factor)*fullVolume
+                    addback.append([amountToTransfer,culture['Row'],culture['Column'],request.form['plateid'],factor])
             dropTip(0)
             for item in addback:
                 getTip(0)
