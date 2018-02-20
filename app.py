@@ -283,6 +283,7 @@ def process_plate():
                 curvol=1000;
             cur = dispense(0,"AliquotPlate",200,row,col);
             curvol=curvol-200;
+        airgap(0);
         dropTip(0)
 
         
