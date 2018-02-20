@@ -232,6 +232,7 @@ def process_plate():
         nonlocal db
         
         if tipcounter[pipette] == maxtips[pipette]:
+            email(request.form['email'],"Please load more tips! <br> <img src='http://phenoplasm.org/sadtips.jpg'>")
             cur = db.execute('INSERT INTO CommandQueue (Command) VALUES ("MoreTips")');
             tipcounter[pipette]=0;
         col, row =divmod(tipcounter[pipette], dimensions[pipette][1])
@@ -240,6 +241,8 @@ def process_plate():
         tipcounter[pipette]= tipcounter[pipette]+1
     def dropTip(pipette):
         cur = db.execute('INSERT INTO CommandQueue (Command, Pipette, Labware) VALUES ("DropTip",?,"trash")',[pipettenames[pipette]]);
+    def email(email,message):
+    	cur = db.execute('INSERT INTO CommandQueue (Command,email, message) VALUES (?,?,?)',['Email',email,message]);
     def aspirate(pipette,labware,volume,row=None,col=None,plateid=None):
         cur = db.execute('INSERT INTO CommandQueue (Command, Pipette, Volume, Labware, Row, Column, PlateID) VALUES ("Aspirate",?,?,?,?,?,?)',[pipettenames[pipette],volume,labware,row,col,plateid])
     def dispense(pipette,labware,volume,row=None,col=None,oncompletion=None,plateid=None,bottom=False):
@@ -543,13 +546,15 @@ def process_plate():
             vol=vol-1000
            
         dropTip(0)
-        cur = db.execute('INSERT INTO CommandQueue (Command) VALUES ("Home")')
-
+        
+        
         
     elif request.form['manual']=="auto":
         print("pph")
     else:
         raise Exception('Neither manual nor auto chosen')
+    email(request.form['email'],"Processing of plate complete")
+    home();
     db.commit()
     return redirect(url_for('view_refreshed'))
 @app.route('/queue')

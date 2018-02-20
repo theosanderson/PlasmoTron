@@ -90,8 +90,10 @@ CREATE TABLE IF NOT EXISTS CommandQueue
     DoneAt INTEGER,
     OrderOfEvents INTEGER,
     LabwareType VARCHAR(30),
-    Slot VARCHAR[10],
-    OnCompletion VARCHAR(300)
+    Slot VARCHAR(10),
+    OnCompletion VARCHAR(300),
+    email VARCHAR(50),
+    message VARCHAR(500)
 
     
 );

@@ -1,6 +1,8 @@
 
 from opentrons import robot, containers, instruments
 import sys
+import urllib.request
+import urllib.parse
 equipment = {}
 CalibrationMode=None
 if len(sys.argv)>1 and sys.argv[1]=="simulate":
@@ -96,6 +98,14 @@ else:
             time.sleep(0.1)
             #print("none")
         else:
+            if command['Command']=="Email":
+
+                    params = urllib.parse.urlencode({'email': command['email'], 'msg': command['message']})
+                    req="http://phenoplasm.org/sendplasmotronemail.php?";
+                    try: 
+                        urllib.request.urlopen(req+params)
+                    except urllib.error.URLError as e:
+                        print(e.reason)
             if command['Command']=="MoreTips":
                     #todo prompt for more tips, for now will just pause queue
                     db.execute('UPDATE CommandQueue SET queued=0 WHERE queued=1')
