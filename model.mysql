@@ -103,3 +103,15 @@ CREATE TABLE IF NOT EXISTS CommandQueue
 
 INSERT INTO PlateClasses (PlateClassID,PlateRows,PlateCols) VALUES (0,8,12);
 INSERT INTO PlateClasses (PlateClassID,PlateRows,PlateCols) VALUES (1,4,6);
+
+
+CREATE TABLE IF NOT EXISTS MachineStatusProperties
+(
+    name VARCHAR(30) PRIMARY KEY,
+    value VARCHAR(20)
+    
+  
+);
+
+INSERT INTO MachineStatusProperties (name,value) VALUES ("tipsusedpipette0",0)
+INSERT INTO MachineStatusProperties (name,value) VALUES ("tipsusedpipette1",0)

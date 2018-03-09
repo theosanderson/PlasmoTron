@@ -262,9 +262,10 @@ def process_plate():
     def airgap(pipette):
         cur = db.execute('INSERT INTO CommandQueue (Command, Pipette) VALUES ("AirGap",?)',[pipettenames[pipette]])
     def home():
-        cur = db.execute('INSERT INTO CommandQueue (Command) VALUES (?)',["Home"])
         dropTip(0)
         dropTip(1)
+        cur = db.execute('INSERT INTO CommandQueue (Command) VALUES (?)',["Home"])
+
     def createOnExecute(action,plateid,platerow,platecol,actionValue=None):
         if actionValue is None:
             onexecute="INSERT INTO Actions (PlateID,Row,Column,TypeOfOperation,ActionTime) VALUES ("+str(plateid)+","+str(platerow)+","+str(platecol)+",'"+action+"',"+"<time>)";
@@ -349,7 +350,7 @@ def process_plate():
     cur = db.execute('select * FROM Cultures INNER JOIN PlatePositions ON Cultures.CultureID = PlatePositions.CultureID INNER JOIN Plates ON PlatePositions.PlateID=Plates.PlateID  WHERE Plates.PlateID=? AND (PlatePositions.Status IS NULL OR PlatePositions.Status != 10) ORDER BY Column, Row',[request.form['plateid']])
     cultures=cur.fetchall()
     tipnumber=0
-    
+    email("email@example.com","Started processing a new plate with command: "+request.form['manual'])
     if request.form['manual']=="split":
             cur = db.execute('SELECT *, PlatePositions.Row AS Row, PlatePositions.Column AS Column FROM Cultures INNER JOIN PlatePositions ON Cultures.CultureID = PlatePositions.CultureID INNER JOIN Plates ON Plates.PlateID=PlatePositions.PlateID AND Plates.PlatePurpose=1 INNER JOIN ( SELECT MAX(timeSampled),* FROM Measurements INNER JOIN PlatePositions ON PlatePositions.Row=Measurements.Row AND PlatePositions.Column=Measurements.Column AND PlatePositions.PlateID = Measurements.PlateID GROUP BY CultureID ) latestparasitaemia ON Cultures.CultureID=latestparasitaemia.CultureID WHERE PlatePositions.PlateID = ?',[request.form['plateid']])
             splitcultures=cur.fetchall();
@@ -463,6 +464,17 @@ def process_plate():
                 cur = dispense(1,"CulturePlate96",feedVolume,0,row)
             dropTip(1)
             cur = db.execute('INSERT INTO CommandQueue (Command) VALUES ("Home")')
+    elif request.form['manual']=="dispenseXtoall":
+        if platestats['PlateClass']==1:
+            getTip(0);
+            for culture in cultures:
+                feedVolume=request.form['parasitaemia']
+                cur = aspirate(0,"TubMedia",feedVolume)
+                onexec=createOnExecute("feed",request.form['plateid'],culture['Row'],culture['Column'])
+                cur = dispense(0,"CulturePlate",feedVolume,culture['Row'],culture['Column'],onexec,plateid=request.form['plateid'])
+               
+            dropTip(0)
+            cur = db.execute('INSERT INTO CommandQueue (Command) VALUES ("Home")')
     elif request.form['manual']=="feedandaliquot" or request.form['manual']=="justaliquot":
         cur = db.execute('INSERT INTO CommandQueue (Command, Labware, LabwareType,Slot) VALUES ("InitaliseLabware","AliquotPlate","96-flat","C1")')
         alwells=[]
@@ -497,7 +509,12 @@ def process_plate():
             airgap(0)
             dropTip(0);
         cur = db.execute('INSERT INTO CommandQueue (Command) VALUES ("Home")')
-    elif request.form['manual']=="feedanddiscard20":
+    elif request.form['manual']=="feedandkeepx":
+        propToKeep = float(request.form['parasitaemia'])
+        if not (propToKeep >0 and propToKeep <101):
+                return ("Error, enter reasonable value for X")
+        amountToRemove=1000 * (1-propToKeep/100)
+
         cur = db.execute('INSERT INTO CommandQueue (Command, Labware, LabwareType,Slot) VALUES ("InitaliseLabware","AliquotPlate","96-flat","C1")')
         for culture in cultures:
             getTip(0)
@@ -508,17 +525,17 @@ def process_plate():
             cur = aspirate(0,"TubMedia",feedVolume)
             cur = dispense(0,"CulturePlate",feedVolume,culture['Row'],culture['Column'],plateid=request.form['plateid'],bottom=True)
             cur = resuspend(0,"CulturePlate",resuspvol,culture['Row'],culture['Column'],plateid=request.form['plateid'])
-            cur = aspirate(0,"CulturePlate",200,culture['Row'],culture['Column'],plateid=request.form['plateid'])
+            cur = aspirate(0,"CulturePlate",amountToRemove,culture['Row'],culture['Column'],plateid=request.form['plateid'])
             airgap(0)
             dropTip(0)
         getTip(0)
         vol=0
         for culture in cultures:
-            if vol==0:
-                cur = aspirate(0,"TubBlood",1000)
+            if vol<amountToRemove:
+                cur = aspirate(0,"TubBlood",1000-vol)
                 vol=1000
-            cur = dispense(0,"CulturePlate",200,culture['Row'],culture['Column'],plateid=request.form['plateid'])
-            vol=vol-200
+            cur = dispense(0,"CulturePlate",amountToRemove,culture['Row'],culture['Column'],plateid=request.form['plateid'])
+            vol=vol-amountToRemove
            
         dropTip(0)
         cur = db.execute('INSERT INTO CommandQueue (Command) VALUES ("Home")')
@@ -779,6 +796,25 @@ def calcpar():
     newlist=calcExpectedParasitaemas(entries);
     newlist= sorted(newlist, key=itemgetter('expectednow'), reverse=True)
     return render_template('calcParasitaemia.html',newlist=newlist);
+
+@app.route('/UpdateCommandTimeEstimates')
+def updatetime():
+    db = get_db()
+    cur = db.execute('DROP TABLE IF EXISTS TimeEstimates;')
+    command="""
+    CREATE TABLE TimeEstimates AS
+    SELECT Command, AVG(timeTaken) FROM (SELECT 
+    g2.Command,
+    (g2.DoneAt - g1.DoneAt) AS timeTaken
+FROM
+    CommandQueue g1
+        INNER JOIN
+    CommandQueue g2 ON g2.CommandID = g1.CommandID + 1 )  WHERE timeTaken<90 GROUP BY Command
+    """
+
+    cur = db.execute('DROP TABLE IF EXISTS TimeEstimates;')
+    cur = db.execute(command)
+    return redirect(url_for('show_plates'))
 
 @app.route('/addPlateForm')
 def addPlateForm():

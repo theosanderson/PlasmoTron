@@ -38,9 +38,10 @@
 
       <select name="manual">
         
-        <option value="feed">Feed</option><option value="split">Split</option><option value="splittonewplate">Split to new plate</option><option value="justaliquot">Just take aliquot</option><option value="feedandaliquot">Feed and aliquot</option>
+        <option value="feed">Feed</option><option value="split">Split to a parasitaemia of X%</option><option value="splittonewplate">Split to new plate with parasitaemia of X%</option><option value="justaliquot">Just take aliquot</option><option value="feedandaliquot">Feed and aliquot</option>
 
-        <option value="feedanddiscard20">Feed and discard 20%</option>
+        <option value="feedandkeepx">Feed and keep X%</option>
+        <option value="dispenseXtoall">Dispense X to all</option> 
         <!--<option value="feedanddiscard50">Feed and discard 50%</option>
         <option value="dispense-sybr-green">Dispense Sybr green</option>
 -->
@@ -48,8 +49,8 @@
 
         Rows used (P200): <input name="tips200"  id="tip200" value="0"/>
 <br>
-        Tips used (P1000):<input name="tips1000" id="tip1000" value="0"/>
-           Max parasitaemia:<input name="parasitaemia" id="parasitaemia" value="0"/>
+        Tips used (P1000):<input name="tips1000" id="tip1000" value="0"/> <br>
+           X:<input name="parasitaemia" id="parasitaemia" value="0"/>
       <script>  
         if($('.flash')){
         $('#title').focus();}
@@ -67,8 +68,9 @@
 <br/>
       <select name="email">
         <!-- Currently hardcoded, but that's temporary -->
+        <option value="none@example.com">--</option>
         <option value="rc17@sanger.ac.uk">rc17@sanger.ac.uk</option><option value="sndrsn@gmail.com">Theo</option><option value="mg26@sanger.ac.uk">mg26@sanger.ac.uk</option>
-        <!--<option value="feedanddiscard50">Feed and discard 50%</option>
+     <!--<
         <option value="dispense-sybr-green">Dispense Sybr green</option>
 -->
       </select><br>
