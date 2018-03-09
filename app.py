@@ -595,7 +595,17 @@ def view_refreshed():
 @app.route('/justQueue')
 def justQueue():
     db = get_db()
+    cur = db.execute('SELECT * FROM TimeEstimates')
+    estimates=cur.fetchall()
+    estimatedict={}
+    for estimate in estimates:
+            estimatedict[estimate['Command']]=estimate['TimeTaken']
     cur = db.execute('SELECT * FROM CommandQueue WHERE doneAt IS NULL')
+    totalTimeLeft=0
+    commands = cur.fetchall()
+    for command in commands:
+        if estimate['Command'] in estimatedict:
+             totalTimeLeft+=estimatedict[command['Command']]
     output=None;
     if queueProcessor == "beginning":
         result="notstarted"
@@ -607,7 +617,11 @@ def justQueue():
             
            result="Crashed"
            #It would be nice to capture output and display it but this seems to involve threading..
-    return render_template('justQueue.html', queue=cur.fetchall(),status=result)
+    minutes, seconds = divmod(totalTimeLeft, 60)
+    seconds=int(seconds)
+    minutes=int(minutes)
+    totalTimeLeft =  '%s:%s' % ( minutes, seconds)
+    return render_template('justQueue.html', queue=commands,status=result,totalTimeLeft=totalTimeLeft)
 
 @app.route('/clearqueue', methods=['POST'])
 def clearqueue():
@@ -803,7 +817,7 @@ def updatetime():
     cur = db.execute('DROP TABLE IF EXISTS TimeEstimates;')
     command="""
     CREATE TABLE TimeEstimates AS
-    SELECT Command, AVG(timeTaken) FROM (SELECT 
+    SELECT Command, AVG(timeTaken) AS TimeTaken FROM (SELECT 
     g2.Command,
     (g2.DoneAt - g1.DoneAt) AS timeTaken
 FROM

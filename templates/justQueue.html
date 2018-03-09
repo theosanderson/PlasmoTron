@@ -31,6 +31,7 @@
 
      <ul>
       <div style="clear:both"></div>
+      <h2>Time left: {{totalTimeLeft}}</h2>
   {% for item in queue %}
   <li {% if item.doneAt is not none %}class="done"{% endif %} {% if item.queued == 1  %}class="inqueue"{% endif %} {% if loop.index == 1 %}
        id="first"
