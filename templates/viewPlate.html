@@ -118,6 +118,21 @@
         <input type=hidden size=30 name=plateID value="{{plate.PlateID}}">
          <input type=submit value="Clear readings">
     </form>
+    {% if plate.PlateFinished == 0 %}
+    <form method=post  action="/closeReadings">
+      <p>
+        <input type=hidden size=30 name=plateID value="{{plate.PlateID}}">
+         <input type=submit value="Finished populating plate">
+    </form>
+    {% endif %}
+      {% if plate.PlateFinished == 1 %}
+      <form method=post  action="/uncloseReadings">
+      <p>
+        <input type=hidden size=30 name=plateID value="{{plate.PlateID}}">
+         <input type=submit value="Re-open plate">
+    </form>
+      {% endif %}
+
 {% endif %}
 
  <form method=post  action="/deletePlate">

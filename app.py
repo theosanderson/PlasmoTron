@@ -741,7 +741,20 @@ def clearReadings():
     flash("Deleted "+str(result)+ " measurements")
     db.commit()
     return redirect(url_for('show_plate',plateID=request.form['plateID']))
-
+@app.route('/closeReadings', methods=['POST'])
+def closeReadings():
+    db = get_db()
+    db.execute('UPDATE Plates SET PlateFinished=1 WHERE PlateID=?',  [request.form['plateID']])
+    flash("The plate has been closed to further readings")
+    db.commit()
+    return redirect(url_for('show_plate',plateID=request.form['plateID']))
+@app.route('/uncloseReadings', methods=['POST'])
+def uncloseReadings():
+    db = get_db()
+    db.execute('UPDATE Plates SET PlateFinished=0 WHERE PlateID=?',  [request.form['plateID']])
+    flash("The plate has been reopened to further readings")
+    db.commit()
+    return redirect(url_for('show_plate',plateID=request.form['plateID']))
 @app.route('/deletePlate', methods=['POST'])
 def deletePlate():
     db = get_db()
