@@ -251,7 +251,7 @@ def process_plate():
         else:
             cur = db.execute('INSERT INTO CommandQueue (Command, Pipette, Volume, Labware, Row, Column,OnCompletion,PlateID) VALUES ("Dispense",?,?,?,?,?,?,?)',[pipettenames[pipette],volume,labware,row,col,oncompletion,plateid])
     def resuspendReservoir(pipette,labware):
-        cur = db.execute('INSERT INTO CommandQueue (Command, Pipette,  Labware) VALUES (?,?,?)',["resuspendReservoir",pipettenames[pipette],labware])
+        cur = db.execute('INSERT INTO CommandQueue (Command, Pipette,  Labware) VALUES (?,?,?)',["ResuspendReservoir",pipettenames[pipette],labware])
    
     def resuspend(pipette,labware,volume,row=None,col=None,plateid=None,double=False):
         if double==False:
@@ -604,7 +604,7 @@ def justQueue():
     totalTimeLeft=0
     commands = cur.fetchall()
     for command in commands:
-        if estimate['Command'] in estimatedict:
+        if command['Command'] in estimatedict:
              totalTimeLeft+=estimatedict[command['Command']]
     output=None;
     if queueProcessor == "beginning":
