@@ -135,7 +135,7 @@ else:
             if command['Command']=="ResuspendReservoir":
                 for i in range(8):
                     equipment[command['Pipette']].aspirate(1000,equipment[command['Labware']][i],rate=2)
-                    equipment[command['Pipette']].dispense(1000,equipment[command['Labware']][i],rate=2)
+                    equipment[command['Pipette']].dispense(1000,equipment[command['Labware']][i].bottom(),rate=2)
 
             if command['Command']=="Resuspend" or command['Command']=="ResuspendDouble":
                 if command['Row'] is not None:
