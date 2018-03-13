@@ -863,9 +863,9 @@ def updatetime():
     cur = db.execute('DROP TABLE IF EXISTS TimeEstimates;')
     command="""
     CREATE TABLE TimeEstimates AS
-    SELECT Command, AVG(timeTaken) AS TimeTaken FROM (SELECT 
+    SELECT Command, AVG(timeTaken) AS TimeTaken ,COUNT(timeTaken) AS Count, SUM(Volume) AS totalVolume  FROM (SELECT 
     g2.Command,
-    (g2.DoneAt - g1.DoneAt) AS timeTaken
+    (g2.DoneAt - g1.DoneAt) AS timeTaken, g2.Volume AS Volume
 FROM
     CommandQueue g1
         INNER JOIN
@@ -874,7 +874,8 @@ FROM
 
     cur = db.execute('DROP TABLE IF EXISTS TimeEstimates;')
     cur = db.execute(command)
-    return redirect(url_for('show_plates'))
+    cur = db.execute('SELECT * FROM TimeEstimates')
+    return render_template('stats.html',results=cur.fetchall());
 
 @app.route('/addPlateForm')
 def addPlateForm():
