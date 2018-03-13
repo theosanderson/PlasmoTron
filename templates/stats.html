@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+{% block body %}
+ 
+  <h2>Statistics</h2>
+
+<table>
+  <tr><td>Command</td><td>Count</td><td>Average time</td> <td>Total volume</td></tr>
+  {% for entry in results %}
+  <tr>
+    <td>{{ entry.Command }} </td> <td>{{ entry.Count }}</td> <td>{{ entry.timeTaken }}</td> <td>{{ entry.totalVolume }}</td>
+ </tr>
+ </tr>
+  {% endfor %}
+  </table>
+
+    
+{% endblock %}
