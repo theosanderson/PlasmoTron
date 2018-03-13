@@ -47,4 +47,6 @@ li#first{font-size:200%; color:black; font-weight:bold;}
 
 input,select {font-size:120%;}
 button{font-size:200%;}
+.parasitaemia{font-size:small;}
 
+table.plate tr td a{color:black;}

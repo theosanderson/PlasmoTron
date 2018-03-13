@@ -78,7 +78,33 @@ def formatRowColumn(Row,Column):
 def displayTime(timer):
     value = datetime.datetime.fromtimestamp(timer)
     return(value.strftime('%Y-%m-%d %H:%M:%S'))
-app.jinja_env.globals.update(formatRowColumn=formatRowColumn,displayTime=displayTime)
+def renderCellStyle(parasitaemia):
+    if parasitaemia is None:
+        return("")
+    else:
+        val=float(min([float(parasitaemia),10]))/10
+        startr=255
+        startg=255
+        startb=255
+        endr=255
+        endg=0
+        endb=0
+        red=startr+val*(endr-startr)
+        green=startg+val*(endg-startg)
+        blue=startb+val*(endb-startb)
+        style="background-color:rgb("+str(int(red))+", "+str(int(green))+", "+str(int(blue))+")"
+        return(style);
+
+
+
+def renderParasitaemiaText(parasitaemia):
+    if parasitaemia is None:
+        return("")
+    else:
+        return("("+str(parasitaemia)+"%)");
+
+
+app.jinja_env.globals.update(formatRowColumn=formatRowColumn,displayTime=displayTime,renderParasitaemiaText=renderParasitaemiaText,renderCellStyle=renderCellStyle)
 
 def connect_db():
     """Connects to the specific database."""
@@ -125,7 +151,9 @@ def show_plate(plateID):
     db = get_db()
     cur = db.execute('select * FROM Plates INNER JOIN PlateClasses ON Plates.PlateClass= PlateClasses.PlateClassID WHERE PlateID= ?',[plateID])
     plate = cur.fetchone()
-    cur = db.execute('select * FROM Cultures INNER JOIN PlatePositions ON Cultures.CultureID = PlatePositions.CultureID WHERE PlateID= ?',[plateID])
+ #   cur = db.execute('select * FROM Cultures INNER JOIN PlatePositions ON Cultures.CultureID = PlatePositions.CultureID WHERE PlateID= ?',[plateID])
+    cur = db.execute('SELECT * FROM Cultures INNER JOIN PlatePositions ON Cultures.CultureID = PlatePositions.CultureID INNER JOIN Plates ON Plates.PlateID=PlatePositions.PlateID AND Plates.PlatePurpose=1 LEFT JOIN ( SELECT MAX(timeSampled),* FROM Measurements INNER JOIN PlatePositions ON PlatePositions.Row=Measurements.Row AND PlatePositions.Column=Measurements.Column AND PlatePositions.PlateID = Measurements.PlateID GROUP BY CultureID ) latestparasitaemia ON Cultures.CultureID=latestparasitaemia.CultureID WHERE PlatePositions.PlateID= ?',[plateID])
+
     entries = cur.fetchall()
     dimx=plate['PlateRows']
     dimy=plate['PlateCols']

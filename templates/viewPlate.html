@@ -19,8 +19,9 @@
   <tr>
   {% for col in row %}
 
-    <td><a 
-      {%if col.Status == 10 %} style="color:gray" {% endif %} href="/culture/{{ col.CultureID }}">{{ col.CultureName }}</a></td>
+    <td style="{% if col.MeasurementValue is defined %}{{  renderCellStyle(col.MeasurementValue ) }}{% endif %}"><a 
+      {%if col.Status == 10 %} style="color:gray" {% endif %} href="/culture/{{ col.CultureID }}">{{ col.CultureName }}</a><div class=parasitaemia>{% if col.MeasurementValue is defined %}{{  renderParasitaemiaText(col.MeasurementValue )}}{% endif %}</div></td>
+
       {% endfor %}
     </tr>
   {% else %}
