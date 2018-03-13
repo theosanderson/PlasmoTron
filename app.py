@@ -152,7 +152,10 @@ def show_plate(plateID):
     cur = db.execute('select * FROM Plates INNER JOIN PlateClasses ON Plates.PlateClass= PlateClasses.PlateClassID WHERE PlateID= ?',[plateID])
     plate = cur.fetchone()
  #   cur = db.execute('select * FROM Cultures INNER JOIN PlatePositions ON Cultures.CultureID = PlatePositions.CultureID WHERE PlateID= ?',[plateID])
-    cur = db.execute('SELECT * FROM Cultures INNER JOIN PlatePositions ON Cultures.CultureID = PlatePositions.CultureID INNER JOIN Plates ON Plates.PlateID=PlatePositions.PlateID AND Plates.PlatePurpose=1 LEFT JOIN ( SELECT MAX(timeSampled),* FROM Measurements INNER JOIN PlatePositions ON PlatePositions.Row=Measurements.Row AND PlatePositions.Column=Measurements.Column AND PlatePositions.PlateID = Measurements.PlateID GROUP BY CultureID ) latestparasitaemia ON Cultures.CultureID=latestparasitaemia.CultureID WHERE PlatePositions.PlateID= ?',[plateID])
+    if plate['PlatePurpose'] == 2:
+        cur = db.execute(' SELECT * FROM  PlatePositions LEFT JOIN Measurements ON PlatePositions.Row=Measurements.Row AND PlatePositions.Column=Measurements.Column AND PlatePositions.PlateID = Measurements.PlateID INNER JOIN Cultures ON Cultures.CultureID=PlatePositions.CultureID WHERE PlatePositions.PlateID= ?',[plateID])
+    else:
+        cur = db.execute('SELECT * FROM Cultures INNER JOIN PlatePositions ON Cultures.CultureID = PlatePositions.CultureID INNER JOIN Plates ON Plates.PlateID=PlatePositions.PlateID AND Plates.PlatePurpose=1 LEFT JOIN ( SELECT MAX(timeSampled),* FROM Measurements INNER JOIN PlatePositions ON PlatePositions.Row=Measurements.Row AND PlatePositions.Column=Measurements.Column AND PlatePositions.PlateID = Measurements.PlateID GROUP BY CultureID ) latestparasitaemia ON Cultures.CultureID=latestparasitaemia.CultureID WHERE PlatePositions.PlateID= ?',[plateID])
 
     entries = cur.fetchall()
     dimx=plate['PlateRows']
@@ -209,6 +212,8 @@ def add_culture():
     if currentRow >= platestats['PlateRows'] or currentCol >= platestats['PlateCols']:
         flash('Culture was attempted to be created outside bounds of plate')
         return redirect(url_for('show_plate',plateID=request.form['plateID']))
+    if request.form['title']=="":
+        return("Error: please enter a name for the culture")
     
     db.execute('insert into Cultures (CultureName) values (?)',
                  [request.form['title']])
