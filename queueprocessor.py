@@ -89,10 +89,12 @@ else:
     robot.head_speed(8000)
 
     dbd.row_factory=sqlite3.Row
-    db=dbd.cursor()
+    
     while 1:
-        a=db.execute("SELECT * FROM CommandQueue  WHERE doneAt is NULL AND queued= 1 ORDER BY OrderOfEvents" )
+        db=dbd.cursor()
+        a=db.execute("SELECT * FROM CommandQueue  WHERE doneAt is NULL AND queued= 1 ORDER BY OrderOfEvents LIMIT 1" )
         command=a.fetchone()
+        db.close()
         if(command == None):
 
             time.sleep(0.1)
@@ -108,8 +110,12 @@ else:
                         print(e.reason)
             if command['Command']=="MoreTips":
                     #todo prompt for more tips, for now will just pause queue
+
+                    db=dbd.cursor()
                     db.execute('UPDATE CommandQueue SET queued=0 WHERE queued=1')
                     dbd.commit()
+                    db.close()
+                    
             if command['Command']=="Home":
                 robot.home()
             if command['Command']=="Aspirate":
@@ -197,6 +203,7 @@ else:
             while 1:
                 try:
                     timestamp=time.time()
+                    db=dbd.cursor()
                     db.execute("UPDATE CommandQueue SET doneAt=?, queued=0 WHERE CommandID= ?",[timestamp,command['CommandID']])
                     dbd.commit()
                     if(command['OnCompletion'] is not None):
