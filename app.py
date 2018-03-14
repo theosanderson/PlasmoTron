@@ -562,6 +562,8 @@ def process_plate():
             airgap(0)
             dropTip(0)
         getTip(0)
+        
+        resuspendReservoir(0,"TubBlood")
         vol=0
         for culture in cultures:
             if vol<amountToRemove:
