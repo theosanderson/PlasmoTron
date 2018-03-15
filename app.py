@@ -146,6 +146,16 @@ def show_plates():
     entries = cur.fetchall()
     return render_template('showPlates.html', entries=entries)
 
+
+def getMachineProperties():
+    db = get_db()
+    cur = db.execute('SELECT * FROM MachineStatusProperties');
+    properties={}
+    entries=cur.fetchall()
+    for entry in entries:
+        properties[entry['name']]=entry['value']
+    return(properties)
+
 @app.route('/plate/<plateID>')
 def show_plate(plateID):
     db = get_db()
@@ -164,7 +174,10 @@ def show_plate(plateID):
     rows = [[{"name":"", "id": -1} for i in range(dimy)] for j in range(dimx)]
     for entry in entries:
         rows[entry['Row']][entry['Column']]=entry
-    return render_template('viewPlate.html', plate=plate,rows=rows)
+
+    machineproperties=getMachineProperties();
+
+    return render_template('viewPlate.html', plate=plate,rows=rows,machineproperties=machineproperties)
 
 @app.route('/culture/<cultureID>')
 def show_culture(cultureID):
@@ -269,7 +282,9 @@ def process_plate():
             cur = db.execute('INSERT INTO CommandQueue (Command) VALUES ("MoreTips")');
             tipcounter[pipette]=0;
         col, row =divmod(tipcounter[pipette], dimensions[pipette][1])
-        cur = db.execute('INSERT INTO CommandQueue (Command, Pipette, Labware, Row, Column) VALUES ("GetTips",?,?,?,?)',[pipettenames[pipette],tipracks[pipette],row,col])
+        onexecute='UPDATE MachineStatusProperties SET value = '+str(tipcounter[pipette]+1)+' WHERE name = "'+ "tipsusedpipette"+str(pipette)+'"' 
+        print(onexecute)
+        cur = db.execute('INSERT INTO CommandQueue (Command, Pipette, Labware, Row, Column, OnCompletion) VALUES ("GetTips",?,?,?,?,?)',[pipettenames[pipette],tipracks[pipette],row,col,onexecute])
         
         tipcounter[pipette]= tipcounter[pipette]+1
     def dropTip(pipette):

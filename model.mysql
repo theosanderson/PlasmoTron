@@ -115,6 +115,8 @@ CREATE TABLE IF NOT EXISTS MachineStatusProperties
 
 INSERT INTO MachineStatusProperties (name,value) VALUES ("tipsusedpipette0",0);
 INSERT INTO MachineStatusProperties (name,value) VALUES ("tipsusedpipette1",0);
+INSERT INTO MachineStatusProperties (name,value) VALUES ("plateloaded0",0);
+INSERT INTO MachineStatusProperties (name,value) VALUES ("plateloaded1",0);
 
 CREATE TABLE IF NOT EXISTS TimeEstimates
 (
