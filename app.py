@@ -376,6 +376,7 @@ def process_plate():
         return redirect(url_for('view_refreshed'))
     home();
     cur = db.execute('SELECT PlateRows,PlateCols,PlateClass FROM Plates INNER JOIN PlateClasses ON Plates.PlateClass= PlateClasses.PlateClassID WHERE PlateID= ?',[request.form['plateid']])
+    
     platestats=cur.fetchone();
 
     if platestats['PlateClass']==0:
@@ -668,7 +669,7 @@ def justQueue():
            result="Crashed"
            #It would be nice to capture output and display it but this seems to involve threading..
     minutes, seconds = divmod(totalTimeLeft, 60)
-    seconds=int(seconds)
+    seconds="%02d" % (int(seconds),)
     minutes=int(minutes)
     totalTimeLeft =  '%s:%s' % ( minutes, seconds)
     return render_template('justQueue.html', queue=commands,status=result,totalTimeLeft=totalTimeLeft)
