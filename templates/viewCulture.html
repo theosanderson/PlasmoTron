@@ -1,14 +1,7 @@
 {% extends "layout.html" %}
 {% block body %}
  <h2>Culture: {{ culture.CultureName }} <small>| <a href="{{ url_for('show_plate',plateID=culture.PlateID) }}"> {{culture.PlateName}}</a>: {{ formatRowColumn(culture.Row,culture.Column)}}</small></h2>
-<h3>Parasitaemias</h3>
-  <ul>
-  {% for item in measurements %}
-  <li>{{item.MeasurementValue}}% - {{displayTime(item.timeSampled)}} </li>
-      {% endfor %}
-      
-  
-</ul>
+
 
 <div class="result" style="width:100% height:200px; margin:0 auto;">
 </div>
@@ -44,7 +37,14 @@ MG.data_graphic({
 
 
 </script>
-    
+    <h3>Parasitaemias</h3>
+  <ul>
+  {% for item in measurements %}
+  <li>{{item.MeasurementValue}}% - {{displayTime(item.timeSampled)}} <small>(<a href="/plate/{{item.PlateID}}">{{item.PlateName}}</a> {{formatRowColumn(item.Row,item.Column)}})</small></li>
+      {% endfor %}
+      
+  
+</ul>
 
   <h3>Action history</h3>
   <ul>

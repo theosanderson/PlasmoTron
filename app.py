@@ -12,18 +12,20 @@ from flask import Flask, request, session, g, redirect, url_for, abort, \
 import sys
 import atexit
 from operator import itemgetter
-
+import string
 
 ALLOWED_EXTENSIONS = set(['csv'])
 
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
+
 app = Flask(__name__) # create the application instance :)
 app.config.from_object(__name__) # load config from this file 
-queueProcessor="beginning";
+queueProcessor="beginning"; #this is used so that the system knows the queue processor script has not been started yet.
 
-InitCommand=0
-# Load default config and override config from an environment variable
+InitCommand=0 #Hacky variable  so that we don't try to kill the queue-processor when initialise the database, creating an error message which would scare users
+
+# Database configuration
 app.config.update(dict(
     DATABASE=os.path.join(app.root_path, 'plasmotron.db'),
     SECRET_KEY='development key',
@@ -32,9 +34,10 @@ app.config.update(dict(
     DEBUG=True
 ))
 app.config.from_envvar('PLASMOTRON_SETTINGS', silent=True)
-import string
-numberstoletters = dict(enumerate(string.ascii_uppercase, 1))
+
+numberstoletters = dict(enumerate(string.ascii_uppercase, 1)) #Used in function below
 def reverseRowColumn(cell):
+    #This function generates rows and columns from a reference like "A5" , "B8"
     cell = cell.lower()
 
     # generate matched object via regex (groups grouped by parentheses)
@@ -65,7 +68,9 @@ def reverseRowColumn(cell):
         row=var1-1
         col=var2-1
         return((row,col))
+
 def formatRowColumn(Row,Column):
+    #This function generates "A1" from 0,0, etc.
     if Row == None :
         newrow=""
     else:
@@ -75,10 +80,13 @@ def formatRowColumn(Row,Column):
     else:
         newcol=Column+1
     return(newrow+str(newcol))
+
 def displayTime(timer):
+    # This function generates a formatted time from a UNIX timestamp
     value = datetime.datetime.fromtimestamp(timer)
     return(value.strftime('%Y-%m-%d %H:%M:%S'))
 def renderCellStyle(parasitaemia):
+    # This function generates a colour value for cell backgrounds, proportional to parasitaemia (0-100)
     if parasitaemia is None:
         return("")
     else:
@@ -98,12 +106,13 @@ def renderCellStyle(parasitaemia):
 
 
 def renderParasitaemiaText(parasitaemia):
+    #Generates a nicely formatted textual version of a parasitaemia (0-100)
     if parasitaemia is None:
         return("")
     else:
         return("("+str(parasitaemia)+"%)");
 
-
+#Load these helper functions:
 app.jinja_env.globals.update(formatRowColumn=formatRowColumn,displayTime=displayTime,renderParasitaemiaText=renderParasitaemiaText,renderCellStyle=renderCellStyle)
 
 def connect_db():
@@ -139,6 +148,7 @@ def initdb_command():
     """Initializes the database."""
     init_db()
     print('Initialized the database.')
+
 @app.route('/')
 def show_plates():
     db = get_db()
@@ -626,6 +636,8 @@ def process_plate():
     home();
     db.commit()
     return redirect(url_for('view_refreshed'))
+
+
 @app.route('/queue')
 @app.route('/queue/<history>')
 def view_queue(history=0):
@@ -745,6 +757,7 @@ def createMeasurementPlate():
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 @app.route('/uploadReadings', methods=['POST'])
 def uploadReadings():
     db = get_db()
@@ -792,6 +805,7 @@ def clearReadings():
     flash("Deleted "+str(result)+ " measurements")
     db.commit()
     return redirect(url_for('show_plate',plateID=request.form['plateID']))
+
 @app.route('/closeReadings', methods=['POST'])
 def closeReadings():
     db = get_db()
@@ -799,6 +813,7 @@ def closeReadings():
     flash("The plate has been closed to further readings")
     db.commit()
     return redirect(url_for('show_plate',plateID=request.form['plateID']))
+
 @app.route('/uncloseReadings', methods=['POST'])
 def uncloseReadings():
     db = get_db()
@@ -806,6 +821,7 @@ def uncloseReadings():
     flash("The plate has been reopened to further readings")
     db.commit()
     return redirect(url_for('show_plate',plateID=request.form['plateID']))
+
 @app.route('/deletePlate', methods=['POST'])
 def deletePlate():
     db = get_db()
@@ -814,6 +830,7 @@ def deletePlate():
     flash("Deleted "+str(result)+ " plate")
     db.commit()
     return redirect(url_for('show_plates'))
+
 @app.route('/killQueueProcessor', methods=['POST'])
 def killQueueProcessor():
     if not InitCommand:
@@ -877,6 +894,11 @@ def calcpar():
 
 @app.route('/UpdateCommandTimeEstimates')
 def updatetime():
+    ''' This calculates the time taken to do each class of command on average, and stores these values in a new DB
+     which are used for time estimation. It also displays some stats, just for fun!
+
+    '''
+
     db = get_db()
     cur = db.execute('DROP TABLE IF EXISTS TimeEstimates;')
     command="""

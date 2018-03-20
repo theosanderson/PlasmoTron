@@ -80,7 +80,9 @@
    
       </dl>
     </form>
-    <script>
+    
+{% endif %}
+<script>
     $('table#plate td').click(function(){
       $('#col').val(this.cellIndex);
       $('#row').val(this.parentNode.rowIndex);
@@ -106,7 +108,6 @@
 
 
 </script>
-{% endif %}
 {% if plate.PlatePurpose == 2 %}
 <h3>Supply readings</h3>
   <form method=post enctype=multipart/form-data action="/uploadReadings">
