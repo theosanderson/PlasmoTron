@@ -10,6 +10,7 @@ PlasmoTron is designed to provide a simple interface that allows cultures of par
 
 ## The database
 At the heart of PlasmoTron is an SQL database. (Currently SQLite though MySQL or similar would be a better solution). The database schema is set-out in *model.sql* and summarised below.
+
 |Table|Purpose  | Notes |
 |--|--|--|
 |Cultures|Stores a record of each culture.| At the moment the only properties Cultures have is a name, although in future they could have information on planned Drug selection, and other properties.|
