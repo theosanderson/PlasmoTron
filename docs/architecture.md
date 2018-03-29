@@ -18,9 +18,9 @@ At the heart of PlasmoTron is an SQL database. (Currently SQLite though MySQL or
 |PlatePositions|Each record links a *culture* to a specific well (*row* and *column*) on a specific *plate*| This records where cultures are on culture plates, and also where they have been aliquotted on measurement plates (a *timeSampled* field records when they were aliquotted).|
 |Measurements|When a measurement plate is read on the flow cytometer, each well (*row* and *column*) of the measurement *plate* is assigned a measurement *value* in this table.| SQL can then be used to link these back to the cultures they represent.|
 |CommandQueue|This table holds raw commands to the robot. These have little semantic meaning, they say things like "Aspirate 200ul from well A1" without further information.|Once a command is executed, the command's record is updated to record when it was executed. In addition, some commands have an *onExecute* string. This is an SQL command which is run on the database after completion. These commands are able to update other tables to provide semantic meaning - e.g. after taking an aliquot the onExecute command will add an entry to PlatePositions reflecting this aliquot.|
-|Actions|This table records actions taken on cultures, with semantic meanings. E.g. "feed" or "split"||
+|Actions|This table records actions taken on cultures, with semantic meanings.| E.g. "feed" or "split"|
 |PlateClasses|This is a basic lookup table which records geometries for each plate class||
-|MachineStatusProperties|This is used to record basic properties that need to be persisted over time. E.g. how many tips have been used of the current box.||
+|MachineStatusProperties|This is used to record basic properties that need to be persisted over time. |E.g. how many tips have been used of the current box.|
 
 ## The web application
 The only way in which a user interacts with this database is via the PlasmoTron web app, which is written in the Flask framework and hosted directly from the server running the robot. This app does all of the heavy-lifting at present. For instance in the app you can click on a plate to see the cultures present on it. You can then use the interface to ask to "Feed" the plate. The app will populate the CommandQueue with the raw commands to the robot needed to carry out this action. 
