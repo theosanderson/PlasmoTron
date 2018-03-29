@@ -57,7 +57,9 @@ cd plasmotron
 ```
 
 First we need to initialise the database:
+
 ```
+export FLASK_APP=app.py
 flask initdb
 ```
 
@@ -65,6 +67,7 @@ flask initdb
 ## First test run
 Now let's try running the app:
 ```
+
 flask run
 ```
 With a bit of luck you will see:
