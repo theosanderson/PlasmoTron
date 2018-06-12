@@ -469,6 +469,38 @@ def process_plate():
                 onexec=createOnExecute("split",request.form['plateid'],culture['Row'],culture['Column'],item[4])
                 cur = dispense(0,"CulturePlate2",item[0],item[1],item[2],onexec,plateid=item[3],bottom=True)
                 dropTip(0)
+    elif request.form['manual']=="dilutenewplate":
+        
+            desiredParasitaemia=float(request.form['parasitaemia'])
+            if not (desiredParasitaemia >0 and desiredParasitaemia <101):
+                return ("Error, enter reasonable parasitaemia")
+            addback=[]
+            getTip(0)
+            resuspendReservoir(0,"TubBlood")
+            for culture in cultures:
+                
+                if 100 > desiredParasitaemia:
+                    factor=desiredParasitaemia/100
+                    amountToTransfer=(factor)*fullVolume
+                    amountOfNewBlood=(1-factor)*fullVolume
+                    
+                    cur = aspirate(0,"TubBlood",amountOfNewBlood)
+                    cur = dispense(0,"CulturePlate2",amountOfNewBlood,culture['Row'],culture['Column'],plateid=request.form['plateid'])
+                   
+                    addback.append([amountToTransfer,culture['Row'],culture['Column'],request.form['plateid'],factor])
+                else:
+                    factor=1
+                    amountToTransfer=(factor)*fullVolume
+                    amountOfNewBlood=(1-factor)*fullVolume
+                    addback.append([amountToTransfer,culture['Row'],culture['Column'],request.form['plateid'],factor])
+            dropTip(0)
+            for item in addback:
+                getTip(0)
+                cur = resuspend(0,"CulturePlate",item[0],item[1],item[2],plateid=item[3])
+                cur = aspirate(0,"CulturePlate",item[0],item[1],item[2],plateid=item[3])
+                onexec=createOnExecute("split",request.form['plateid'],culture['Row'],culture['Column'],item[4])
+                cur = dispense(0,"CulturePlate2",item[0],item[1],item[2],onexec,plateid=item[3],bottom=True)
+                dropTip(0)
          
     elif request.form['manual']=="dispense-sybr-green":
         getTip(0)
