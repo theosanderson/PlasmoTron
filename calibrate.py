@@ -172,7 +172,10 @@ def main(stdscr):
     
     
         if key=="m":
-            equipment[currentPipette].move_to(equipment[currentlyCalibrating])
+            well = equipment[currentlyCalibrating][0]
+            pos = well.from_center(x=0, y=0, z=-1, reference=equipment[currentlyCalibrating])
+            location = (equipment[currentlyCalibrating], pos)
+            equipment[currentPipette].move_to(location)
             position=list(robot._driver.get_head_position()["current"])
         if key=="h":
             robot.home()
