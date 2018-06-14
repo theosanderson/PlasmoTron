@@ -7,7 +7,7 @@ def getEquipment():
         ############## DECK LAYOUT BEGINS HERE
         #CONTAINER DEFINITIONS:
         TransposeTipBox=True
-        containers.create("epmotion30",grid=(8,1),spacing=(9.02,9.02),diameter=10,depth=55) #EpMotion Reservoir
+
         containers.create("24corning",grid=(4,6),spacing=(19.304,19.304),diameter=16.26,depth=18) #24-well plate
 
         #DECK:
@@ -21,9 +21,9 @@ def getEquipment():
         equipment['CulturePlate96']  = containers.load('96-flat', 'B2')
         equipment['CulturePlate2']  = containers.load('24corning', 'C2', 'CulturePlate242')
         equipment['AliquotPlate']  = containers.load('96-flat', 'C2', 'AliquotPlate')
-        equipment['TubBlood']=containers.load('epmotion30', "D1","TubBlood")
-        equipment['TubMedia']=containers.load('epmotion30', "D1","TubMedia")
-        equipment['TubSybr']=containers.load('epmotion30', "D1","TubSybr")
+        equipment['TubBlood']=create_container_instance("TubBlood",slot="D1",grid=(8,1),spacing=(9.02,9.02),diameter=10,depth=55)
+        equipment['TubMedia']=create_container_instance("TubMedia",slot="D1",grid=(8,1),spacing=(9.02,9.02),diameter=10,depth=55)
+        equipment['TubSybr']=create_container_instance("TubSybr",slot="D1",grid=(8,1),spacing=(9.02,9.02),diameter=10,depth=55)
 
         #PIPETTE(S)
         equipment['p1000'] = instruments.Pipette(
