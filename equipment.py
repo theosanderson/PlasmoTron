@@ -21,9 +21,9 @@ def getEquipment():
         equipment['CulturePlate96']  = containers.load('96-flat', 'B2')
         equipment['CulturePlate2']  = containers.load('24corning', 'C2', 'CulturePlate242')
         equipment['AliquotPlate']  = containers.load('96-flat', 'C2', 'AliquotPlate')
-        equipment['TubBlood']=create_container_instance("TubBlood",slot="D1",grid=(8,1),spacing=(9.02,9.02),diameter=10,depth=55)
-        equipment['TubMedia']=create_container_instance("TubMedia",slot="D1",grid=(8,1),spacing=(9.02,9.02),diameter=10,depth=55)
-        equipment['TubSybr']=create_container_instance("TubSybr",slot="D1",grid=(8,1),spacing=(9.02,9.02),diameter=10,depth=55)
+        equipment['TubBlood']=create_container_instance("TubBlood",slot="D1",grid=(8,1),spacing=(9.02,9.02),diameter=0,depth=55)
+        equipment['TubMedia']=create_container_instance("TubMedia",slot="D1",grid=(8,1),spacing=(9.02,9.02),diameter=0,depth=55)
+        equipment['TubSybr']=create_container_instance("TubSybr",slot="D1",grid=(8,1),spacing=(9.02,9.02),diameter=0,depth=55)
 
         #PIPETTE(S)
         equipment['p1000'] = instruments.Pipette(

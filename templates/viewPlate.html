@@ -48,10 +48,10 @@
 -->
       </select><br>
 
-        Rows used (P200): <input name="tips200"  id="tip200" value="{{machineproperties["tipsusedpipette1"]}}"/>
+        Rows used (P200): <input name="tips200"  type="number"  id="tip200" value="{{machineproperties["tipsusedpipette1"]}}"/>
 <br>
-        Tips used (P1000):<input name="tips1000" id="tip1000" value="{{machineproperties["tipsusedpipette0"]}}"/> <br>
-           X:<input name="parasitaemia" id="parasitaemia" value="0"/>
+        Tips used (P1000):<input name="tips1000" type="number" id="tip1000" value="{{machineproperties["tipsusedpipette0"]}}"/> <br>
+           X:<input name="parasitaemia" id="parasitaemia" type="number" value="0"/>
       <script>  
         if($('.flash')){
         $('#title').focus();}
@@ -63,7 +63,8 @@
       $.fn.numpad.defaults.buttonFunctionTpl = '<button type="button" class="btn" style="width: 100%;"></button>';
       $.fn.numpad.defaults.onKeypadCreate = function(){$(this).find('.done').addClass('btn-primary');};
       
-  $('#tip1000').numpad();
+ // $('#tip1000').numpad(); 
+//Uncomment these to enable a numpad
   //$('#parasitaemia').numpad();
 </script>
 <br/>
