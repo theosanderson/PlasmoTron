@@ -2,13 +2,10 @@
 
 ## Deck set up and calibration
 
-This Flask app is essentially a replacement for the OpenTrons interface. In regular use you will not need to use the OpenTrons app. However you do need to use the app one more time -- to set up the layout you will use for culture.
+#Deck set-up
 
-If you have already experimented with running some protocols in OpenTrons (which you really should have before starting this!) you will be aware of how to perform calibration. First lets check you are happy with the deck setup.
+The deck layout is defined in `equipment.py` in the PlasmoTron folder.
 
-Using an editor of your choice, open `queueprocessor.py` in the plasmotron directory.
-
-Find the section where the deck layout is defined.
 
 <p align="center">
 <img src="images/decklayout.png"/></p>
@@ -37,21 +34,24 @@ It is important that the deck layout section defines these key components:
 * **CulturePlate2** Sometimes we want to split from one plate into another. This is the location we will put the second plate at. It can be the same position in the deck as the AliquotPlate
 * **TubMedia**,**TubBlood**, **TubSybr** These are tubs where we will get the media, blood and SYBR-green respectively. We use EpMotion 30ml reservoirs for these, but you can customise as you want. (TubSybr actually isn't important if you are happy to pre-load your Sybr-Green plates without using the robot.)
 
-Do edit this file to suit your preferences.
+This file can be left as it is or edited to suit your preferences.
 
-When you are done, save it.
+#Small culture hoods
+[To add section on transposed tip rack here]
 
-Now we are ready to calibrate. Load up the OpenTrons app. Press *Click to upload* and navigate to the plasmotron directory. Open the `queueprocessor.py` file.
+#Calibration
+Now we are ready to calibrate.
 
-If any sort of error occurs you have probably introduced an error while modifying the Deck Setup. You may want to revert to the [original file](https://github.com/theosanderson/plasmotron/blob/master/queueprocessor.py) and slowly make changes until you find the source of the problem.
+Close the PlasmoTron server and in a new terminal run:
 
-But hopefully no errors occur and you are presented with a screen something like this:
+```
+source PlasmoTronPyEnv/bin/activate
+cd PlasmoTron
+python calibrate.py
 
-<p align="center">
-<img src="images/calibration.png"/></p>
+```
 
-Now proceed to calibrate as described in the [OpenTrons documentation](https://support.opentrons.com/getting-started/software-setup/calibrating-the-deck), until every item of equipment you need to use has a green tick. 
+If you have already practiced calibrating with the GUI app you will know what to do. Place the pipette in the bottom left well/tip of each container, and calibrate the plunger positions for the pipette.
 
-We're now ready to close the OpenTrons app and open up the web application. If the calibration is correct we will never need the OpenTrons app again.
 
 Next up you can get to grips with PlasmoTron itself in the [tutorial](Tutorial.md).
