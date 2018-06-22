@@ -40,7 +40,7 @@ def getEquipment():
             name="p200x8",
             axis="a",
             min_volume=20,
-            max_volume=200,
+            max_volume=300,
             trash_container=equipment['trash'],
             channels=8
         )

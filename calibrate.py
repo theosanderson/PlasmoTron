@@ -131,6 +131,7 @@ def main(stdscr):
         stdscr.clear()
         stdscr.addstr("PLASMOTRON CALIBRATION MODE\n\n")
         stdscr.addstr("Keyboard shortcuts:\n")
+        stdscr.addstr("Control+C - exit\n")
         stdscr.addstr("P - choose what pipette to calibrate with\n")
         
         stdscr.addstr("C - choose what container to calibrate\n")
