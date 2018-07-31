@@ -36,10 +36,10 @@ It is important that the deck layout section defines these key components:
 
 This file can be left as it is or edited to suit your preferences.
 
-#Small culture hoods
+# Small culture hoods
 [To add section on transposed tip rack here]
 
-#Calibration
+# Calibration
 Now we are ready to calibrate.
 
 Close the PlasmoTron server and in a new terminal run:
@@ -51,7 +51,6 @@ python calibrate.py
 
 ```
 
-If you have already practiced calibrating with the GUI app you will know what to do. Place the pipette in the bottom left well/tip of each container, and calibrate the plunger positions for the pipette.
-
+If you have already practiced calibrating with the GUI app you will know what to do. First calibrate the plunger positions for each pipette. Then with a tip loaded go through each piece of labware, placing the pipette at the bottom of the bottom left well/tip of each container.
 
 Next up you can get to grips with PlasmoTron itself in the [tutorial](Tutorial.md).
