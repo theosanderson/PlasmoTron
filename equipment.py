@@ -14,7 +14,7 @@ def getEquipment():
         equipment['trash']=containers.load('point', "C1","trash")
         equipment['p200rack'] = containers.load('tiprack-200ul', 'E2', 'tiprack200')
         if TransposeTipBox:
-             equipment['p1000rack']  = create_container_instance("TR1000-Transposed",slot="A1",grid=(8,12),spacing=(9.02,9.02),diameter=5,depth=85,Transposed=True)
+             equipment['p1000rack']  = create_container_instance("TR1000-Transposed",slot="A1",grid=(8,12),spacing=(9.02,-9.02),diameter=5,depth=85,Transposed=True)
         else:
              equipment['p1000rack']  = create_container_instance("TR1000-Normal",slot="A1",grid=(8,12),spacing=(9.02,9.02),diameter=5,depth=85)
         equipment['CulturePlate']  = containers.load('24corning', 'B2', 'CulturePlate24')
