@@ -1,1 +1,5 @@
 .*swp
+logs
+calibrations
+plasmotron.db
+_*_
