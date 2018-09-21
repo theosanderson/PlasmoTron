@@ -1,5 +1,5 @@
 <!doctype html>
-<title>PlasmoTRON</title>
+<title>PlasmoTron</title>
 <link href="https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300,300i,700|Open+Sans:300,300i,400,400i,600,600i,700&amp;subset=greek" rel="stylesheet">
 <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
 <link rel=stylesheet type=text/css href="{{ url_for('static', filename='metricsgraphics.css') }}">
@@ -13,7 +13,7 @@
 	<div class="rightmenu">
 		<a href="/refresh">Robot controller</a>&nbsp;&nbsp;<a href="/calcparasitaemia">Cultures</a>
 	</div>
-  <a href="/"><h1>PlasmoTRON</h1></a>
+  <a href="/"><h1>{{ config['INSTANCE_NAME'] or 'PlasmoTron' }}</h1></a>
   <div class=metanav>
   
     
