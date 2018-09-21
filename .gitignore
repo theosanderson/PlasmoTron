@@ -1,4 +1,5 @@
 .*swp
+local_config.cfg
 logs
 calibrations
 plasmotron.db

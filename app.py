@@ -38,6 +38,13 @@ app.config.update(
         DEBUG=True))
 app.config.from_envvar('PLASMOTRON_SETTINGS', silent=True)
 
+# local instance configuration: if a file
+# local_config.cfg exists, it is read. This can be
+# used to set the instance name for example
+localConfigFilePath="local_config.cfg"
+if os.path.isfile( localConfigFilePath ):
+  app.config.from_pyfile('local_config.cfg')
+
 numberstoletters = dict(enumerate(string.ascii_uppercase,
                                   1))  #Used in function below
 
