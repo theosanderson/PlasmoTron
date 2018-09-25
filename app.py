@@ -341,6 +341,25 @@ def add_manual_action():
   flash('The action was successfully added')
   return redirect(url_for('show_culture', cultureID=request.form['cultureid']))
 
+@app.route('/addmanualactionforchechcalib', methods=['POST'])
+def add_manual_action_for_check_calib():
+
+  doAction = request.form['doAction']
+  usePipette = request.form['usePipette']
+  useContainer = request.form['useContainer'] or None
+  useRow = request.form['useRow'] or None
+  useCol = request.form['useCol'] or None
+  useVolume = request.form['useVolume'] or None
+
+  db = get_db()
+  db.execute(
+      'insert into CommandQueue (Command,Pipette,Labware,Row,Column,Volume,queued) values (?,?,?,?,?,?,?)',
+      [
+          doAction, usePipette, useContainer, useRow,useCol,useVolume,1
+      ])
+  db.commit()
+  return redirect(url_for('checkCalibration'))
+
 
 @app.route('/processplate', methods=['POST'])
 def process_plate():
@@ -1330,6 +1349,11 @@ FROM
 def addPlateForm():
   return render_template('newPlateForm.html')
 
+
+@app.route('/checkCalibration')
+def checkCalibration():
+  db = get_db()
+  return render_template('checkCalibration.html')
 
 atexit.register(cleanup)
 

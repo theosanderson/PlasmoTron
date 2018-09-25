@@ -1,0 +1,105 @@
+{% extends "layout.html" %}
+{% block body %}
+ 
+<script>
+$(document).ready(function(){
+  $('#runCmdButton').click(function() { 
+        $.ajax({
+            url: 'addmanualactionforchechcalib',
+            type: 'POST',
+            data: form.serialize()
+        });  
+  });
+});
+</script>
+
+<h2>check and adjust calibrations</h2>
+
+<p>Run a command and add to the queue</p>
+<form action='/addmanualactionforchechcalib' method="post" name="robotActionsForm">
+  <p>
+  pipette 
+  <select name="usePipette">
+    <option value="p1000">p1000</option>
+    <option value="p200">p200</option>
+  </select>
+  </p>
+
+  <p>
+    container
+    <select name="useContainer">
+      <option value="">none</option>
+      <option value="CulturePlate">CulturePlate</option>
+      <option value="CulturePlate2">CulturePlate2</option>
+      <option value="AliquotPlate">AliquotPlate</option>
+      <option value="p1000rack">p1000rack</option>
+      <option value="trash">trash</option>
+      <option value="TubBlood">TubBlood</option>
+      <option value="TubMedia">TubMedia</option>
+      <option value="TubSybr">TubSybr</option>
+    </select>
+  </p>
+  <p>
+    row
+    <select name="useRow">
+      <option value="">none</option>
+      <option value="0">A</option>
+      <option value="1">B</option>
+      <option value="2">C</option>
+      <option value="3">D</option>
+      <option value="4">E</option>
+      <option value="5">F</option>
+      <option value="6">G</option>
+      <option value="7">H</option>
+    </select>
+  </p>
+
+  <p>
+    column
+    <select name="useCol">
+      <option value="">none</option>
+      <option value="0">1</option>
+      <option value="1">2</option>
+      <option value="2">3</option>
+      <option value="3">4</option>
+      <option value="4">5</option>
+      <option value="5">6</option>
+      <option value="6">7</option>
+      <option value="7">8</option>
+      <option value="8">9</option>
+      <option value="9">10</option>
+      <option value="10">11</option>
+      <option value="11">12</option>
+    </select>
+  </p>
+
+
+  <p>
+    action
+    <select name="doAction">
+      <option value="GetTips">GetTips</option>
+      <option value="Aspirate">Aspirate</option>
+      <option value="Dispense">Dispense</option>
+      <option value="DropTip">DropTip</option>
+      <option value="AirGap">AirGap</option>
+      <option value="DispenseBottom">DispenseBottom</option>
+      <option value="Resuspend">Resuspend</option>
+      <option value="Home">Home</option>
+      <option value="resuspendReservoir">resuspendReservoir</option>
+      <option value="ResuspendDouble">ResuspendDouble</option>
+      <option value="ResuspendReservoir">ResuspendReservoir</option>
+      <option value="InitaliseLabware">InitaliseLabware</option>
+    </select>
+  </p>
+
+  <p>
+  volume
+  <input type="text" name="useVolume">
+  </p>
+  <p>
+  <button id="runCmdButton">run command</button>
+  </p>
+</form> 
+
+
+{% endblock %}
