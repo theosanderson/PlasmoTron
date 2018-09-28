@@ -170,4 +170,6 @@ class CommandIssuer():
       'select * FROM Cultures INNER JOIN PlatePositions ON Cultures.CultureID = PlatePositions.CultureID INNER JOIN Plates ON PlatePositions.PlateID=Plates.PlateID  WHERE Plates.PlateID=? AND (PlatePositions.Status IS NULL OR PlatePositions.Status != 10) ORDER BY Column, Row',
       [request.form['plateid']])
     return(cur.fetchall())
+  def finalise(self):
+    self.db.commit()
 
