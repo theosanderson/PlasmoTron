@@ -25,7 +25,7 @@ More recently (due only to requirements imposed by our IT department) we have us
 ### Software
 
 #### Operating system
-Linux and OSX are both fine. Theoretically Windows should work too but we haven't tried this.
+Linux and OSX both work. Theoretically Windows should work too but we haven't tried this.
 
 #### OpenTrons app is no longer required
 We have written a customised calibration script so you don't need the OpenTrons app
