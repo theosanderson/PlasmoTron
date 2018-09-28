@@ -374,7 +374,7 @@ def process_plate():
   if scheme_name not in processing_schemes.registered_schemes
     flash('Error: non-existing plate processing scheme')
     return redirect(url_for('view_refreshed')
-  scheme = processing_schemes.registered_schemes[scheme_name]()
+  scheme = processing_schemes.registered_schemes[scheme_name](command_issuer,request.form)
   scheme.process()                  
 
   return redirect(url_for('view_refreshed'))
