@@ -346,10 +346,21 @@ def add_manual_action_for_check_calib():
 
   doAction = request.form['doAction']
   usePipette = request.form['usePipette']
-  useContainer = request.form['useContainer'] or None
-  useRow = request.form['useRow'] or None
-  useCol = request.form['useCol'] or None
-  useVolume = request.form['useVolume'] or None
+  useContainer = None
+  if 'useContainer' in request.form and request.form['useContainer']:
+    useContainer = request.form['useContainer']
+
+  useRow = None
+  if 'useRow' in request.form and request.form['useRow']:
+    useRow = request.form['useRow']
+
+  useCol = None
+  if 'useCol' in request.form and request.form['useCol']:
+    useCol = request.form['useCol']
+
+  useVolume = None
+  if 'useVolume' in request.form and request.form['useVolume']:
+    useVolume = request.form['useVolume']
 
   db = get_db()
   db.execute(

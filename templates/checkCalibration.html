@@ -12,6 +12,11 @@ $(document).ready(function(){
   });
 
   var optionsForContainer = {
+    "none" : {
+      allowedActions : [ "Home", "InitaliseLabware" ],
+      selectedAction : 'Home',
+      disabledInputs : [ "useVolume","useRow", "useCol" ],
+    },
     "CulturePlate" : {
       allowedActions : [ "Aspirate", "Dispense", "AirGap", 
         "DispenseBottom","Resuspend","ResuspendDouble","Home" ],
@@ -156,7 +161,7 @@ function selectAllow( selectFieldId, allowOptions ){
   </p>
   <p>
     row
-    <select name="useRow" id="useRow">
+    <select name="useRow" id="useRow" disabled="disabled>"
       <option value="0">A</option>
       <option value="1">B</option>
       <option value="2">C</option>
@@ -170,7 +175,7 @@ function selectAllow( selectFieldId, allowOptions ){
 
   <p>
     column
-    <select name="useCol" id="useCol">
+    <select name="useCol" id="useCol" disabled="disabled">
       <option value="0">1</option>
       <option value="1">2</option>
       <option value="2">3</option>
@@ -190,6 +195,7 @@ function selectAllow( selectFieldId, allowOptions ){
   <p>
     action
     <select name="doAction" id="doAction">
+      <option value="Home">Home</option>
       <option value="GetTips">GetTips</option>
       <option value="Aspirate">Aspirate</option>
       <option value="Dispense">Dispense</option>
@@ -197,7 +203,6 @@ function selectAllow( selectFieldId, allowOptions ){
       <option value="AirGap">AirGap</option>
       <option value="DispenseBottom">DispenseBottom</option>
       <option value="Resuspend">Resuspend</option>
-      <option value="Home">Home</option>
       <option value="ResuspendDouble">ResuspendDouble</option>
       <option value="ResuspendReservoir">ResuspendReservoir</option>
       <option value="InitaliseLabware">InitaliseLabware</option>
@@ -206,7 +211,7 @@ function selectAllow( selectFieldId, allowOptions ){
 
   <p>
   volume
-  <input type="text" name="useVolume" id="useVolume">
+  <input type="text" name="useVolume" id="useVolume" disabled="disabled">
   </p>
   <p>
   <button id="runCmdButton">run command</button>
