@@ -1,4 +1,4 @@
-SCHEME_REGISTRY = [] 
+SCHEME_REGISTRY = {}
 
 def register_scheme(scheme_class):
   """This defines a decorator used to make scheme-processing enumeration simple."""
