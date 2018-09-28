@@ -11,7 +11,7 @@ class ProcessingScheme:
     self.command_issuer = command_issuer
     self.form_inputs = form_inputs
   def pre_sequence(self):
-    home()
+    self.command_issuer.home()
   def post_sequence(self):
     self.command_issuer.finalise()
   def main_sequence(self):
