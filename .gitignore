@@ -5,3 +5,4 @@ calibrations
 plasmotron.db
 _*_
 containers
+local_equipment.py
