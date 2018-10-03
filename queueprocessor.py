@@ -3,7 +3,15 @@ from opentrons import robot, containers, instruments
 import sys
 import urllib.request
 import urllib.parse
-from equipment import getEquipment
+
+# some robots may need hacking the equipment.py file, so
+# check if a local one exists before importing the one
+# that comes with the repo (and should work for all robots)
+try:
+  from local_equipment import getEquipment
+except ImportError:
+  from equipment import getEquipment
+
 
 CalibrationMode=None
 if len(sys.argv)>1 and sys.argv[1]=="simulate":
