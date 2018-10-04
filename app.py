@@ -1174,37 +1174,55 @@ def allowed_file(filename):
 
 @app.route('/uploadReadings', methods=['POST'])
 def uploadReadings():
+  # TODO(theosanderson): At present this is all set up just for CytoFlex CSV files. 
+  # We should abstract all this into a cytoflex specific class, provide alternatives,
+  # and a way of configuring which one is to be used.
   db = get_db()
   if request.method == 'POST':
     # check if the post request has the file part
     if 'file' not in request.files:
-      flash('No file part')
+      flash('No CSV file')
       return redirect(url_for('show_plate', plateID=request.form['plateID']))
     file = request.files['file']
-    # if user does not select file, browser also
-    # submit a empty part without filename
+    # if user does not select file, the browser submits an empty filename:
     if file.filename == '':
-      flash('No selected file')
+      flash('Please select a file to upload')
       return redirect(url_for('show_plate', plateID=request.form['plateID']))
     if file and allowed_file(file.filename):
       measurements = 0
       text = file.read()
       for l in text.splitlines():
-        mylist = str(l).split(',')
-        name = mylist[0]
-        mylist2 = name.split('-')
-        location = mylist2[len(mylist2) - 1]
-        if len(mylist) > 5 and len(mylist2) > 2:
-          percent = mylist[7]
+        column_values = str(l).split(',')
+        well_name = column_values[0]
+        well_name_split = well_name.split('-')
+        # get the last element of the first column: this will be the well reference on the measurement plate: A1, C3, etc.
+        location = well_name_split[len(well_name_split) - 1] 
+     
+        if len(well_name_split) > 2: #this skips non-data lines at the top of the CSV
+               
+          # if there are only two columns, then column 2 will have the parasitaemia
+          # measurements. If there are more than 5 then this is the old
+          # format and measurements should be in column 8
+          if len(column_values) == 2 :
+            percent = column_values[1]
+          elif len(column_values) > 7 :
+            percent = column_values[7]
 
           if percent != '':
             percent = float(re.findall(r'[-+]?\d*\.\d+|\d+', percent)[0])
             (row, col) = reverseRowColumn(location)
 
             eprint('Location' + str(row) + ',' + str(col) + ',' + str(percent))
-            db.execute(
-                'INSERT INTO Measurements (PlateID,Row,Column,MeasurementValue) values (?,?,?,?)',
-                [request.form['plateID'], row, col, percent])
+            try:
+              db.execute(
+                  'INSERT INTO Measurements (PlateID,Row,Column,MeasurementValue) values (?,?,?,?)',
+                  [request.form['plateID'], row, col, percent])
+            except sqlite3.IntegrityError:
+              flash('ERROR: Duplicated entries - some of these measurement wells have already had data uploaded to them. Please delete these measurements before uploading replacement data.')
+              return redirect(url_for('show_plate', plateID=request.form['plateID']))
+            except Exception as e:
+              flash('ERROR: Loading data into database failed. Please contact administrator. <br><br>Error:'+str(e))
+              return redirect(url_for('show_plate', plateID=request.form['plateID']))
             measurements = measurements + 1
       db.execute('UPDATE Plates SET PlateFinished=1 WHERE PlateID=?',
                  [request.form['plateID']])
