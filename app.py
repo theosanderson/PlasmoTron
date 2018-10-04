@@ -1178,7 +1178,7 @@ def uploadReadings():
   if request.method == 'POST':
     # check if the post request has the file part
     if 'file' not in request.files:
-      flash('No file part')
+      flash('No CSV file')
       return redirect(url_for('show_plate', plateID=request.form['plateID']))
     file = request.files['file']
     # if user does not select file, browser also
@@ -1194,17 +1194,30 @@ def uploadReadings():
         name = mylist[0]
         mylist2 = name.split('-')
         location = mylist2[len(mylist2) - 1]
-        if len(mylist) > 5 and len(mylist2) > 2:
-          percent = mylist[7]
+        # if there are only two columns, then column 2 will have the
+        # measurements. If there are more than 5 then this is the old
+        # format and measurements should be in column 8
+        if len(mylist2) > 2:
+          if len(mylist) == 2 :
+            percent = mylist[1]
+          elif len(mylist) > 7 :
+            percent = mylist[7]
 
           if percent != '':
             percent = float(re.findall(r'[-+]?\d*\.\d+|\d+', percent)[0])
             (row, col) = reverseRowColumn(location)
 
             eprint('Location' + str(row) + ',' + str(col) + ',' + str(percent))
-            db.execute(
-                'INSERT INTO Measurements (PlateID,Row,Column,MeasurementValue) values (?,?,?,?)',
-                [request.form['plateID'], row, col, percent])
+            try:
+              db.execute(
+                  'INSERT INTO Measurements (PlateID,Row,Column,MeasurementValue) values (?,?,?,?)',
+                  [request.form['plateID'], row, col, percent])
+            except sqlite3.IntegrityError:
+              flash('ERROR: duplicated entries - these measurements have been uploaded previously')
+              return redirect(url_for('show_plate', plateID=request.form['plateID']))
+            except:
+              flash('ERROR: Loading data into database failed. Please contact administrator.')
+              return redirect(url_for('show_plate', plateID=request.form['plateID']))
             measurements = measurements + 1
       db.execute('UPDATE Plates SET PlateFinished=1 WHERE PlateID=?',
                  [request.form['plateID']])
