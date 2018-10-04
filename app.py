@@ -1174,6 +1174,9 @@ def allowed_file(filename):
 
 @app.route('/uploadReadings', methods=['POST'])
 def uploadReadings():
+  # TODO(theosanderson): At present this is all set up just for CytoFlex CSV files. 
+  # We should abstract all this into a cytoflex specific class, provide alternatives,
+  # and a way of configuring which one is to be used.
   db = get_db()
   if request.method == 'POST':
     # check if the post request has the file part
