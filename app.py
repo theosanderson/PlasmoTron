@@ -1181,10 +1181,9 @@ def uploadReadings():
       flash('No CSV file')
       return redirect(url_for('show_plate', plateID=request.form['plateID']))
     file = request.files['file']
-    # if user does not select file, browser also
-    # submit a empty part without filename
+    # if user does not select file, the browser submits an empty filename:
     if file.filename == '':
-      flash('No selected file')
+      flash('Please select a file to upload')
       return redirect(url_for('show_plate', plateID=request.form['plateID']))
     if file and allowed_file(file.filename):
       measurements = 0
@@ -1193,8 +1192,9 @@ def uploadReadings():
         mylist = str(l).split(',')
         name = mylist[0]
         mylist2 = name.split('-')
-        location = mylist2[len(mylist2) - 1]
-        # if there are only two columns, then column 2 will have the
+        # get the last element of the first column: this will be the well reference on the measurement plate: A1, C3, etc.
+        location = mylist2[len(mylist2) - 1] 
+        # if there are only two columns, then column 2 will have the parasitaemia
         # measurements. If there are more than 5 then this is the old
         # format and measurements should be in column 8
         if len(mylist2) > 2:
@@ -1213,7 +1213,7 @@ def uploadReadings():
                   'INSERT INTO Measurements (PlateID,Row,Column,MeasurementValue) values (?,?,?,?)',
                   [request.form['plateID'], row, col, percent])
             except sqlite3.IntegrityError:
-              flash('ERROR: duplicated entries - these measurements have been uploaded previously')
+              flash('ERROR: Duplicated entries - some of these measurement wells have already had data uploaded to them. Please delete these measurements before uploading replacement data.')
               return redirect(url_for('show_plate', plateID=request.form['plateID']))
             except:
               flash('ERROR: Loading data into database failed. Please contact administrator.')
