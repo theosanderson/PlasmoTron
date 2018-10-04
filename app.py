@@ -1197,7 +1197,7 @@ def uploadReadings():
         # if there are only two columns, then column 2 will have the parasitaemia
         # measurements. If there are more than 5 then this is the old
         # format and measurements should be in column 8
-        if len(well_name_split) > 2:
+        if len(well_name_split) > 2: #this skips non-data lines at the top of the CSV
           if len(column_values) == 2 :
             percent = column_values[1]
           elif len(column_values) > 7 :
