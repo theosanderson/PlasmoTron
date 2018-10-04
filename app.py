@@ -1189,19 +1189,19 @@ def uploadReadings():
       measurements = 0
       text = file.read()
       for l in text.splitlines():
-        mylist = str(l).split(',')
-        name = mylist[0]
-        mylist2 = name.split('-')
+        column_values = str(l).split(',')
+        well_name = column_values[0]
+        well_name_split = well_name.split('-')
         # get the last element of the first column: this will be the well reference on the measurement plate: A1, C3, etc.
-        location = mylist2[len(mylist2) - 1] 
+        location = well_name_split[len(well_name_split) - 1] 
         # if there are only two columns, then column 2 will have the parasitaemia
         # measurements. If there are more than 5 then this is the old
         # format and measurements should be in column 8
-        if len(mylist2) > 2:
-          if len(mylist) == 2 :
-            percent = mylist[1]
-          elif len(mylist) > 7 :
-            percent = mylist[7]
+        if len(well_name_split) > 2:
+          if len(column_values) == 2 :
+            percent = column_values[1]
+          elif len(column_values) > 7 :
+            percent = column_values[7]
 
           if percent != '':
             percent = float(re.findall(r'[-+]?\d*\.\d+|\d+', percent)[0])
