@@ -1194,10 +1194,12 @@ def uploadReadings():
         well_name_split = well_name.split('-')
         # get the last element of the first column: this will be the well reference on the measurement plate: A1, C3, etc.
         location = well_name_split[len(well_name_split) - 1] 
-        # if there are only two columns, then column 2 will have the parasitaemia
-        # measurements. If there are more than 5 then this is the old
-        # format and measurements should be in column 8
+     
         if len(well_name_split) > 2: #this skips non-data lines at the top of the CSV
+               
+          # if there are only two columns, then column 2 will have the parasitaemia
+          # measurements. If there are more than 5 then this is the old
+          # format and measurements should be in column 8
           if len(column_values) == 2 :
             percent = column_values[1]
           elif len(column_values) > 7 :
