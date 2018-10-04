@@ -1215,8 +1215,8 @@ def uploadReadings():
             except sqlite3.IntegrityError:
               flash('ERROR: Duplicated entries - some of these measurement wells have already had data uploaded to them. Please delete these measurements before uploading replacement data.')
               return redirect(url_for('show_plate', plateID=request.form['plateID']))
-            except:
-              flash('ERROR: Loading data into database failed. Please contact administrator.')
+            except Exception as e:
+              flash('ERROR: Loading data into database failed. Please contact administrator. <br><br>Error:'+str(e))
               return redirect(url_for('show_plate', plateID=request.form['plateID']))
             measurements = measurements + 1
       db.execute('UPDATE Plates SET PlateFinished=1 WHERE PlateID=?',
