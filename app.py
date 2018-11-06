@@ -803,6 +803,47 @@ def process_plate():
         cur = dispense(1, 'CulturePlate96', feedVolume, 0, row)
       dropTip(1)
       cur = db.execute('INSERT INTO CommandQueue (Command) VALUES ("Home")')
+
+    
+  elif request.form['manual'] == '6WP_feed':
+  # This is an experimental protocol for testing the use of 6 well plates
+  # We don't have 6well plates as labware in the system yet but we will set the,
+  # up like regular 24 well plates and only use wells A1, C3 and A5 of the 24 well
+  # plate to address the first 3 wells of the 6 well plate. So this protocol relies
+  # on setting up the culture plate correctly.
+  # The difference to the 24well feed protocol is that we aspirate and dispense 5
+  # times to empty and fill the larger wells.
+    if platestats['PlateClass'] == 1:
+      for culture in cultures: 
+        getTip(0)
+        for x in range(5):
+          cur = aspirate(
+            0,
+            'CulturePlate',
+            feedVolume + extraRemoval, 
+            culture['Row'], 
+            culture['Column'],
+            plateid=request.form['plateid']
+          )
+          cur = dispense(0, 'trash', feedVolume +extraRemoval)
+        dropTip(0)
+        getTip(0)
+        for x in range(5):
+          cur = aspirate(0, 'TubMedia', feedVolume)
+          onexec = createOnExecute('feed', request.form['plateid'],culture['Row'], culture['Column']) #MG: This has been changed
+          cur = dispense(
+           0,
+           'CulturePlate',
+           feedVolume,
+           culture['Row'],
+           culture['Column'],
+           onexec,
+           plateid=request.form['plateid']
+           )
+        
+        dropTip(0)
+      
+
   elif request.form['manual'] == 'dispenseXtoall':
     if platestats['PlateClass'] == 1:
       getTip(0)
