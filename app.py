@@ -50,7 +50,10 @@ numberstoletters = dict(enumerate(string.ascii_uppercase,
 
 
 def reverseRowColumn(cell):
-  #This function generates rows and columns from a reference like "A5" , "B8"
+  """Converts battleships-style cell references to numeric.
+  
+  "A1" -> (0,0) 
+  """
   cell = cell.lower()
 
   # generate matched object via regex (groups grouped by parentheses)
@@ -84,7 +87,15 @@ def reverseRowColumn(cell):
 
 
 def formatRowColumn(Row, Column):
-  #This function generates "A1" from 0,0, etc.
+  """Converts numeric indices to battleships-style cell-references.
+  Args:
+     Row: 0-indexed row index
+     Column: 0-indexed column index
+  Returns:
+     String representation in battleships-style.
+  0,0 -> "A1"
+  
+  """
   if Row == None:
     newrow = ''
   else:
@@ -97,7 +108,7 @@ def formatRowColumn(Row, Column):
 
 
 def displayTime(timer):
-  # This function generates a formatted time from a UNIX timestamp
+  """Generates a formatted time from an integer UNIX timestamp."""
   value = datetime.datetime.fromtimestamp(timer)
   return (value.strftime('%Y-%m-%d %H:%M:%S'))
 
@@ -123,7 +134,7 @@ def renderCellStyle(parasitaemia):
 
 
 def renderParasitaemiaText(parasitaemia):
-  #Generates a nicely formatted textual version of a parasitaemia (0-100)
+  """Generates a nicely formatted textual version of a parasitaemia (0-100)."""
   if parasitaemia is None:
     return ('')
   else:
@@ -263,6 +274,12 @@ def show_culture(cultureID):
 
 @app.route('/addculture', methods=['POST'])
 def add_culture():
+  """Process form for adding a new culture to a plate.
+  By default we put it in the well after the furthest well across the plate.
+  But if the user specifies a location this is used in preference.
+  
+  Duplicated locations will raise a database error.
+  """
 
   db = get_db()
   cur = db.execute(
@@ -311,7 +328,7 @@ def add_culture():
 
 @app.route('/addplate', methods=['POST'])
 def add_plate():
-
+  
   db = get_db()
   title = request.form['title'].strip()
   if len(title) > 0:
