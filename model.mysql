@@ -103,6 +103,7 @@ CREATE TABLE IF NOT EXISTS CommandQueue
 
 INSERT INTO PlateClasses (PlateClassID,PlateRows,PlateCols) VALUES (0,8,12);
 INSERT INTO PlateClasses (PlateClassID,PlateRows,PlateCols) VALUES (1,4,6);
+INSERT INTO PlateClasses (PlateClassID,PlateRows,PlateCols) VALUES (2,2,3);
 
 
 CREATE TABLE IF NOT EXISTS MachineStatusProperties

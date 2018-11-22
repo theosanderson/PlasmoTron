@@ -9,8 +9,11 @@ def getEquipment():
         TransposeTipBox=True
 
         containers.create("24corning",grid=(4,6),spacing=(19.304,19.304),diameter=16.26,depth=18) #24-well plate
+        containers.create("6corning",grid=(2,3),spacing=(39.12,39.12),diameter=34.80,depth=11.27) #6-well plate
 
         #DECK:
+        # col A = left-hand side when viewed from front
+        # row 1 = first row viewed from front
         equipment['trash']=containers.load('point', "C1","trash")
         equipment['p200rack'] = containers.load('tiprack-200ul', 'E2', 'tiprack200')
         if TransposeTipBox:
@@ -20,6 +23,7 @@ def getEquipment():
         equipment['CulturePlate']  = containers.load('24corning', 'B2', 'CulturePlate24')
         equipment['CulturePlate96']  = containers.load('96-flat', 'B2')
         equipment['CulturePlate2']  = containers.load('24corning', 'C2', 'CulturePlate242')
+        equipment['CulturePlate6well']  = containers.load('6corning', 'D2', 'CulturePlate6')
         equipment['AliquotPlate']  = containers.load('96-flat', 'C2', 'AliquotPlate')
         equipment['TubBlood']=create_container_instance("TubBlood",slot="D1",grid=(8,1),spacing=(9.02,9.02),diameter=0,depth=55)
         equipment['TubMedia']=create_container_instance("TubMedia",slot="D1",grid=(8,1),spacing=(9.02,9.02),diameter=0,depth=55)

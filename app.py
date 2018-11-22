@@ -567,6 +567,17 @@ def process_plate():
     aliquotvol = 20
     resuspvol = 800
     fullVolume = 1000
+  elif platestats['PlateClass'] == 2:
+    cur = db.execute(
+        'INSERT INTO CommandQueue (Command, Labware, LabwareType,Slot) VALUES ("InitaliseLabware","CulturePlate6well","6-well-plate","B1")'
+    )
+    # for 6well plates, teh actual feed volume is more than what is shown here
+    # because we are removing and topping up more than once
+    feedVolume = 900
+    extraRemoval = 15
+    aliquotvol = 20
+    resuspvol = 900
+    fullVolume = 1000
   else:
     raise Exception('Undefined plate class?')
   cur = db.execute(
@@ -804,16 +815,7 @@ def process_plate():
       dropTip(1)
       cur = db.execute('INSERT INTO CommandQueue (Command) VALUES ("Home")')
 
-    
-  elif request.form['manual'] == '6WP_feed':
-  # This is an experimental protocol for testing the use of 6 well plates
-  # We don't have 6well plates as labware in the system yet but we will set the,
-  # up like regular 24 well plates and only use wells A1, C3 and A5 of the 24 well
-  # plate to address the first 3 wells of the 6 well plate. So this protocol relies
-  # on setting up the culture plate correctly.
-  # The difference to the 24well feed protocol is that we aspirate and dispense 5
-  # times to empty and fill the larger wells.
-    if platestats['PlateClass'] == 1:
+    elif platestats['PlateClass'] == 2:
       for culture in cultures: 
         getTip(0)
         for x in range(5):
