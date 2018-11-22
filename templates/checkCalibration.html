@@ -33,6 +33,14 @@ $(document).ready(function(){
       selectedAction : 'Aspirate',
       disabledInputs : [],
     },
+    "CulturePlate6well" : {
+      allowedActions : [ "Aspirate", "Dispense", "AirGap", 
+        "DispenseBottom","Resuspend","ResuspendDouble","Home" ],
+      maxRow : 2,
+      maxCol : 3,
+      selectedAction : 'Aspirate',
+      disabledInputs : [],
+    },
     "AliquotPlate" : {
       allowedActions : [ "Aspirate", "Dispense", "AirGap", 
         "DispenseBottom","Resuspend","ResuspendDouble","Home" ],
@@ -151,6 +159,7 @@ function selectAllow( selectFieldId, allowOptions ){
       <option value="">none</option>
       <option value="CulturePlate">CulturePlate</option>
       <option value="CulturePlate2">CulturePlate2</option>
+      <option value="CulturePlate6well">CulturePlate6well</option>
       <option value="AliquotPlate">AliquotPlate</option>
       <option value="p1000rack">p1000rack</option>
       <option value="trash">trash</option>

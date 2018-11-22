@@ -821,7 +821,7 @@ def process_plate():
         for x in range(5):
           cur = aspirate(
             0,
-            'CulturePlate',
+            'CulturePlate6well',
             feedVolume + extraRemoval, 
             culture['Row'], 
             culture['Column'],
@@ -835,7 +835,7 @@ def process_plate():
           onexec = createOnExecute('feed', request.form['plateid'],culture['Row'], culture['Column']) #MG: This has been changed
           cur = dispense(
            0,
-           'CulturePlate',
+           'CulturePlate6well',
            feedVolume,
            culture['Row'],
            culture['Column'],
