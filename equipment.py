@@ -8,9 +8,6 @@ def getEquipment():
         #CONTAINER DEFINITIONS:
         TransposeTipBox=True
 
-        containers.create("24corning",grid=(4,6),spacing=(19.304,19.304),diameter=16.26,depth=18) #24-well plate
-        containers.create("6corning",grid=(2,3),spacing=(39.12,39.12),diameter=34.80,depth=11.27) #6-well plate
-
         #DECK:
         # col A = left-hand side when viewed from front
         # row 1 = first row viewed from front
