@@ -2,6 +2,7 @@
 local_config.cfg
 logs
 calibrations
+containers
 plasmotron.db
 _*_
 local_equipment.py
