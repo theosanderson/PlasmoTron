@@ -17,19 +17,12 @@ def getEquipment():
             equipment['p1000rack']  = create_container_instance("TR1000-Transposed",slot="A1",grid=(8,12),spacing=(9.02,-9.02),diameter=5,depth=85,Transposed=True)
         else:
             equipment['p1000rack']  = create_container_instance("TR1000-Normal",slot="A1",grid=(8,12),spacing=(9.02,9.02),diameter=5,depth=85)
+        equipment['CulturePlate']  = containers.load('24corning', 'B2', 'CulturePlate24')
         equipment['CulturePlate96']  = containers.load('96-flat', 'B2')
+        equipment['CulturePlate2']  = containers.load('24corning', 'C2', 'CulturePlate242')
+        equipment['CulturePlate6well']  = containers.load('6corning', 'D2', 'CulturePlate6')
         equipment['AliquotPlate']  = containers.load('96-flat', 'C2', 'AliquotPlate')
-
-        # create_container_instance in utilities.py does an ad-hoc creation of a custom
-        # container without the need to save to JSON file. There is a bug in Opentrons code
-        # that randomises order of wells in JSON efinition files for custom containers as 
-        # soon as more than one container is used, which is why containers.create is not an
-        # option for 2 containers.
-        equipment['CulturePlate']=create_container_instance("CulturePlate24",slot="B2",grid=(4,6),spacing=(19.304,19.304),diameter=16.26,depth=18)
-        equipment['CulturePlate2']=create_container_instance("CulturePlate242",slot="C2",grid=(4,6),spacing=(19.304,19.304),diameter=16.26,depth=18)
-        equipment['CulturePlate6well']=create_container_instance("CulturePlate6",slot="D2",grid=(2,3),spacing=(39.12,39.12),diameter=34.80,depth=11.27)
-
-        CulturePlate['TubBlood']=create_container_instance("TubBlood",slot="D1",grid=(8,1),spacing=(9.02,9.02),diameter=0,depth=55)
+        equipment['TubBlood']=create_container_instance("TubBlood",slot="D1",grid=(8,1),spacing=(9.02,9.02),diameter=0,depth=55)
         equipment['TubMedia']=create_container_instance("TubMedia",slot="D1",grid=(8,1),spacing=(9.02,9.02),diameter=0,depth=55)
         equipment['TubSybr']=create_container_instance("TubSybr",slot="D1",grid=(8,1),spacing=(9.02,9.02),diameter=0,depth=55)
 
