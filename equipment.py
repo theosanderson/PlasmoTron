@@ -21,7 +21,7 @@ def getEquipment():
 
         # create_container_instance in utilities.py does an ad-hoc creation of a custom
         # container without the need to save to JSON file. There is a bug in Opentrons code
-        # that randomises order of wells in JSON efinition files for custom containers as 
+        # that randomises order of wells in JSON definition files for custom containers as 
         # soon as more than one container is used, which is why containers.create is not an
         # option for 2 containers.
         equipment['CulturePlate']=utilities.create_container_instance("CulturePlate24",slot="D2",grid=(4,6),spacing=(19.304,19.304),diameter=16.26,depth=18)
