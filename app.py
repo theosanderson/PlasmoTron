@@ -41,8 +41,8 @@ app.config.from_envvar('PLASMOTRON_SETTINGS', silent=True)
 # local instance configuration: if a file
 # local_config.cfg exists, it is read. This can be
 # used to set the instance name for example
-localConfigFilePath="local_config.cfg"
-if os.path.isfile( localConfigFilePath ):
+localConfigFilePath = 'local_config.cfg'
+if os.path.isfile(localConfigFilePath):
   app.config.from_pyfile('local_config.cfg')
 
 numberstoletters = dict(enumerate(string.ascii_uppercase,
@@ -51,8 +51,8 @@ numberstoletters = dict(enumerate(string.ascii_uppercase,
 
 def reverseRowColumn(cell):
   """Converts battleships-style cell references to numeric.
-  
-  "A1" -> (0,0) 
+
+  "A1" -> (0,0)
   """
   cell = cell.lower()
 
@@ -88,13 +88,15 @@ def reverseRowColumn(cell):
 
 def formatRowColumn(Row, Column):
   """Converts numeric indices to battleships-style cell-references.
+
   Args:
      Row: 0-indexed row index
      Column: 0-indexed column index
+
   Returns:
      String representation in battleships-style.
   0,0 -> "A1"
-  
+
   """
   if Row == None:
     newrow = ''
@@ -275,9 +277,10 @@ def show_culture(cultureID):
 @app.route('/addculture', methods=['POST'])
 def add_culture():
   """Process form for adding a new culture to a plate.
+
   By default we put it in the well after the furthest well across the plate.
   But if the user specifies a location this is used in preference.
-  
+
   Duplicated locations will raise a database error.
   """
 
@@ -328,7 +331,7 @@ def add_culture():
 
 @app.route('/addplate', methods=['POST'])
 def add_plate():
-  
+
   db = get_db()
   title = request.form['title'].strip()
   if len(title) > 0:
@@ -358,6 +361,7 @@ def add_manual_action():
   flash('The action was successfully added')
   return redirect(url_for('show_culture', cultureID=request.form['cultureid']))
 
+
 @app.route('/addmanualactionforchechcalib', methods=['POST'])
 def add_manual_action_for_check_calib():
 
@@ -382,9 +386,7 @@ def add_manual_action_for_check_calib():
   db = get_db()
   db.execute(
       'insert into CommandQueue (Command,Pipette,Labware,Row,Column,Volume,queued) values (?,?,?,?,?,?,?)',
-      [
-          doAction, usePipette, useContainer, useRow,useCol,useVolume,1
-      ])
+      [doAction, usePipette, useContainer, useRow, useCol, useVolume, 1])
   db.commit()
   return redirect(url_for('checkCalibration'))
 
@@ -408,31 +410,31 @@ def process_plate():
           request.form['email'],
           "Please load more tips! <br> <img src='http://phenoplasm.org/sadtips.jpg'>"
       )
-      cur = db.execute('INSERT INTO CommandQueue (Command) VALUES ("MoreTips")')
+      db.execute('INSERT INTO CommandQueue (Command) VALUES ("MoreTips")')
       tipcounter[pipette] = 0
     col, row = divmod(tipcounter[pipette], dimensions[pipette][1])
     onexecute = 'UPDATE MachineStatusProperties SET value = ' + str(
         tipcounter[pipette] +
         1) + ' WHERE name = "' + 'tipsusedpipette' + str(pipette) + '"'
     print(onexecute)
-    cur = db.execute(
+    db.execute(
         'INSERT INTO CommandQueue (Command, Pipette, Labware, Row, Column, OnCompletion) VALUES ("GetTips",?,?,?,?,?)',
         [pipettenames[pipette], tipracks[pipette], row, col, onexecute])
 
     tipcounter[pipette] = tipcounter[pipette] + 1
 
   def dropTip(pipette):
-    cur = db.execute(
+    db.execute(
         'INSERT INTO CommandQueue (Command, Pipette, Labware) VALUES ("DropTip",?,"trash")',
         [pipettenames[pipette]])
 
   def email(email, message):
-    cur = db.execute(
+    db.execute(
         'INSERT INTO CommandQueue (Command,email, message) VALUES (?,?,?)',
         ['Email', email, message])
 
   def aspirate(pipette, labware, volume, row=None, col=None, plateid=None):
-    cur = db.execute(
+    db.execute(
         'INSERT INTO CommandQueue (Command, Pipette, Volume, Labware, Row, Column, PlateID) VALUES ("Aspirate",?,?,?,?,?,?)',
         [pipettenames[pipette], volume, labware, row, col, plateid])
 
@@ -445,14 +447,14 @@ def process_plate():
                plateid=None,
                bottom=False):
     if (bottom == True):
-      cur = db.execute(
+      db.execute(
           'INSERT INTO CommandQueue (Command, Pipette, Volume, Labware, Row, Column,OnCompletion,PlateID) VALUES ("DispenseBottom",?,?,?,?,?,?,?)',
           [
               pipettenames[pipette], volume, labware, row, col, oncompletion,
               plateid
           ])
     else:
-      cur = db.execute(
+      db.execute(
           'INSERT INTO CommandQueue (Command, Pipette, Volume, Labware, Row, Column,OnCompletion,PlateID) VALUES ("Dispense",?,?,?,?,?,?,?)',
           [
               pipettenames[pipette], volume, labware, row, col, oncompletion,
@@ -460,7 +462,7 @@ def process_plate():
           ])
 
   def resuspendReservoir(pipette, labware):
-    cur = db.execute(
+    db.execute(
         'INSERT INTO CommandQueue (Command, Pipette,  Labware) VALUES (?,?,?)',
         ['ResuspendReservoir', pipettenames[pipette], labware])
 
@@ -475,19 +477,19 @@ def process_plate():
       Command = 'Resuspend'
     else:
       Command = 'ResuspendDouble'
-    cur = db.execute(
+    db.execute(
         'INSERT INTO CommandQueue (Command, Pipette, Volume, Labware, Row, Column,PlateID) VALUES (?,?,?,?,?,?,?)',
         [Command, pipettenames[pipette], volume, labware, row, col, plateid])
 
   def airgap(pipette):
-    cur = db.execute(
+    db.execute(
         'INSERT INTO CommandQueue (Command, Pipette) VALUES ("AirGap",?)',
         [pipettenames[pipette]])
 
   def home():
     dropTip(0)
     dropTip(1)
-    cur = db.execute('INSERT INTO CommandQueue (Command) VALUES (?)', ['Home'])
+    db.execute('INSERT INTO CommandQueue (Command) VALUES (?)', ['Home'])
 
   def createOnExecute(action, plateid, platerow, platecol, actionValue=None):
     if actionValue is None:
@@ -512,9 +514,9 @@ def process_plate():
     for well in destwells:
       (plate, row, col) = well
       if curvol < 200:
-        cur = aspirate(0, 'TubSybr', 1000)
+        aspirate(0, 'TubSybr', 1000)
         curvol = 1000
-      cur = dispense(0, 'AliquotPlate', 200, row, col)
+      dispense(0, 'AliquotPlate', 200, row, col)
       curvol = curvol - 200
     airgap(0)
     dropTip(0)
@@ -566,7 +568,7 @@ def process_plate():
   platestats = cur.fetchone()
 
   if platestats['PlateClass'] == 0:
-     # 96 well plates (poorly supported at present)
+    # 96 well plates (poorly supported at present)
     cur = db.execute(
         'INSERT INTO CommandQueue (Command, Labware, LabwareType,Slot) VALUES ("InitaliseLabware","CulturePlate","96-flat","B1")'
     )
@@ -587,7 +589,7 @@ def process_plate():
     resuspvol = 800
     fullVolume = 1000
   elif platestats['PlateClass'] == 2:
-     # 6 well plates
+    # 6 well plates
     cur = db.execute(
         'INSERT INTO CommandQueue (Command, Labware, LabwareType,Slot) VALUES ("InitaliseLabware","CulturePlate6well","6-well-plate","B1")'
     )
@@ -623,7 +625,7 @@ def process_plate():
         factor = desiredParasitaemia / culture['expectednow']
         amountToRemove = (1 - factor) * fullVolume
         getTip(0)
-        cur = resuspend(
+        resuspend(
             0,
             'CulturePlate',
             resuspvol,
@@ -631,7 +633,7 @@ def process_plate():
             culture['Column'],
             plateid=request.form['plateid'],
             double=True)
-        cur = aspirate(
+        aspirate(
             0,
             'CulturePlate',
             amountToRemove,
@@ -647,10 +649,10 @@ def process_plate():
     getTip(0)
     resuspendReservoir(0, 'TubBlood')
     for item in addback:
-      cur = aspirate(0, 'TubBlood', item[0])
+      aspirate(0, 'TubBlood', item[0])
       onexec = createOnExecute('split', request.form['plateid'], item[1],
                                item[2], item[4])
-      cur = dispense(
+      dispense(
           0, 'CulturePlate', item[0], item[1], item[2], onexec, plateid=item[3])
     dropTip(0)
 
@@ -672,8 +674,8 @@ def process_plate():
         amountToTransfer = (factor) * fullVolume
         amountOfNewBlood = (1 - factor) * fullVolume
 
-        cur = aspirate(0, 'TubBlood', amountOfNewBlood)
-        cur = dispense(
+        aspirate(0, 'TubBlood', amountOfNewBlood)
+        dispense(
             0,
             'CulturePlate2',
             amountOfNewBlood,
@@ -696,13 +698,11 @@ def process_plate():
     dropTip(0)
     for item in addback:
       getTip(0)
-      cur = resuspend(
-          0, 'CulturePlate', item[0], item[1], item[2], plateid=item[3])
-      cur = aspirate(
-          0, 'CulturePlate', item[0], item[1], item[2], plateid=item[3])
+      resuspend(0, 'CulturePlate', item[0], item[1], item[2], plateid=item[3])
+      aspirate(0, 'CulturePlate', item[0], item[1], item[2], plateid=item[3])
       onexec = createOnExecute('split', request.form['plateid'], culture['Row'],
                                culture['Column'], item[4])
-      cur = dispense(
+      dispense(
           0,
           'CulturePlate2',
           item[0],
@@ -727,8 +727,8 @@ def process_plate():
         amountToTransfer = (factor) * fullVolume
         amountOfNewBlood = (1 - factor) * fullVolume
 
-        cur = aspirate(0, 'TubBlood', amountOfNewBlood)
-        cur = dispense(
+        aspirate(0, 'TubBlood', amountOfNewBlood)
+        dispense(
             0,
             'CulturePlate2',
             amountOfNewBlood,
@@ -751,10 +751,8 @@ def process_plate():
     dropTip(0)
     for item in addback:
       getTip(0)
-      resuspend(
-          0, 'CulturePlate', item[0], item[1], item[2], plateid=item[3])
-      aspirate(
-          0, 'CulturePlate', item[0], item[1], item[2], plateid=item[3])
+      resuspend(0, 'CulturePlate', item[0], item[1], item[2], plateid=item[3])
+      aspirate(0, 'CulturePlate', item[0], item[1], item[2], plateid=item[3])
       onexec = createOnExecute('split', request.form['plateid'], culture['Row'],
                                culture['Column'], item[4])
       dispense(
@@ -774,9 +772,9 @@ def process_plate():
     for x in range(8):
       for y in range(6):
         if curvol < 200:
-          cur = aspirate(0, 'TubSybr', 1000)
+          aspirate(0, 'TubSybr', 1000)
           curvol = 1000
-        cur = dispense(0, 'AliquotPlate', 200, x, y)
+        dispense(0, 'AliquotPlate', 200, x, y)
         curvol = curvol - 200
     dropTip(0)
   # TODO: branch below can probably be deleted
@@ -837,49 +835,47 @@ def process_plate():
       db.execute('INSERT INTO CommandQueue (Command) VALUES ("Home")')
 
     elif platestats['PlateClass'] == 2:
-     # 6-well plates
-      for culture in cultures: 
+      # 6-well plates
+      for culture in cultures:
         getTip(0)
         for x in range(5):
           aspirate(
-            0,
-            'CulturePlate6well',
-            feedVolume + extraRemoval, 
-            culture['Row'], 
-            culture['Column'],
-            plateid=request.form['plateid']
-          )
-          dispense(0, 'trash', feedVolume +extraRemoval)
+              0,
+              'CulturePlate6well',
+              feedVolume + extraRemoval,
+              culture['Row'],
+              culture['Column'],
+              plateid=request.form['plateid'])
+          dispense(0, 'trash', feedVolume + extraRemoval)
         dropTip(0)
         getTip(0)
         for x in range(5):
           aspirate(0, 'TubMedia', feedVolume)
-          if x == 0: # record feed once only
-            onexec = createOnExecute('feed', request.form['plateid'],culture['Row'], culture['Column'])
+          if x == 0:  # record feed once only
+            onexec = createOnExecute('feed', request.form['plateid'],
+                                     culture['Row'], culture['Column'])
           else:
             onexec = None
           dispense(
-           0,
-           'CulturePlate6well',
-           feedVolume,
-           culture['Row'],
-           culture['Column'],
-           onexec,
-           plateid=request.form['plateid']
-           )
-        
+              0,
+              'CulturePlate6well',
+              feedVolume,
+              culture['Row'],
+              culture['Column'],
+              onexec,
+              plateid=request.form['plateid'])
+
         dropTip(0)
-      
 
   elif request.form['manual'] == 'dispenseXtoall':
     if platestats['PlateClass'] == 1:
       getTip(0)
       for culture in cultures:
         feedVolume = request.form['parasitaemia']
-        cur = aspirate(0, 'TubMedia', feedVolume)
+        aspirate(0, 'TubMedia', feedVolume)
         onexec = createOnExecute('feed', request.form['plateid'],
                                  culture['Row'], culture['Column'])
-        cur = dispense(
+        dispense(
             0,
             'CulturePlate',
             feedVolume,
@@ -907,15 +903,15 @@ def process_plate():
       (alplate, alrow, alcol) = alwells[i]
       getTip(0)
       if request.form['manual'] == 'feedandaliquot':
-        cur = aspirate(0, 'CulturePlate', feedVolume + extraRemoval, culwell[0],
-                       culwell[1], request.form['plateid'])
+        aspirate(0, 'CulturePlate', feedVolume + extraRemoval, culwell[0],
+                 culwell[1], request.form['plateid'])
         airgap(0)
         dropTip(0)
         getTip(0)
-        cur = aspirate(0, 'TubMedia', feedVolume)
+        aspirate(0, 'TubMedia', feedVolume)
         onexec = createOnExecute('feed', request.form['plateid'], culwell[0],
                                  culwell[1])
-        cur = dispense(
+        dispense(
             0,
             'CulturePlate',
             feedVolume,
@@ -924,14 +920,14 @@ def process_plate():
             onexec,
             plateid=request.form['plateid'],
             bottom=True)
-      cur = resuspend(
+      resuspend(
           0,
           'CulturePlate',
           resuspvol,
           culwell[0],
           culwell[1],
           plateid=request.form['plateid'])
-      cur = aspirate(
+      aspirate(
           0,
           'CulturePlate',
           aliquotvol,
@@ -946,7 +942,7 @@ def process_plate():
                    '(PlateID,Row,Column,CultureID,timeSampled) VALUES ('
                   ) + str(alplate) + ',' + str(alrow) + ',' + str(
                       alcol) + ',' + str(culwell[2]) + ',' + '<time>)'
-      cur = dispense(
+      dispense(
           0,
           'AliquotPlate',
           aliquotvol,
@@ -955,8 +951,8 @@ def process_plate():
           onexecute,
           alplate,
           bottom=True)
-      cur = aspirate(0, 'AliquotPlate', 100, alrow, alcol, plateid=alplate)
-      cur = dispense(
+      aspirate(0, 'AliquotPlate', 100, alrow, alcol, plateid=alplate)
+      dispense(
           0, 'AliquotPlate', 100, alrow, alcol, plateid=alplate, bottom=True)
       airgap(0)
       dropTip(0)
@@ -972,7 +968,7 @@ def process_plate():
     )
     for culture in cultures:
       getTip(0)
-      cur = aspirate(
+      aspirate(
           0,
           'CulturePlate',
           feedVolume + extraRemoval,
@@ -982,8 +978,8 @@ def process_plate():
       airgap(0)
       dropTip(0)
       getTip(0)
-      cur = aspirate(0, 'TubMedia', feedVolume)
-      cur = dispense(
+      aspirate(0, 'TubMedia', feedVolume)
+      dispense(
           0,
           'CulturePlate',
           feedVolume,
@@ -991,14 +987,14 @@ def process_plate():
           culture['Column'],
           plateid=request.form['plateid'],
           bottom=True)
-      cur = resuspend(
+      resuspend(
           0,
           'CulturePlate',
           resuspvol,
           culture['Row'],
           culture['Column'],
           plateid=request.form['plateid'])
-      cur = aspirate(
+      aspirate(
           0,
           'CulturePlate',
           amountToRemove,
@@ -1013,9 +1009,9 @@ def process_plate():
     vol = 0
     for culture in cultures:
       if vol < amountToRemove:
-        cur = aspirate(0, 'TubBlood', 1000 - vol)
+        aspirate(0, 'TubBlood', 1000 - vol)
         vol = 1000
-      cur = dispense(
+      dispense(
           0,
           'CulturePlate',
           amountToRemove,
@@ -1027,13 +1023,13 @@ def process_plate():
     dropTip(0)
     cur = db.execute('INSERT INTO CommandQueue (Command) VALUES ("Home")')
   elif request.form['manual'] == 'feedanddiscard50':
-    cur = aspirate(0, 'TubMedia', 1500)
+    aspirate(0, 'TubMedia', 1500)
     cur = db.execute(
         'INSERT INTO CommandQueue (Command, Labware, LabwareType,Slot) VALUES ("InitaliseLabware","AliquotPlate","96-flat","C1")'
     )
     for culture in cultures:
       getTip(0)
-      cur = aspirate(
+      aspirate(
           0,
           'CulturePlate',
           feedVolume + extraRemoval,
@@ -1043,8 +1039,8 @@ def process_plate():
       airgap(0)
       dropTip(0)
       getTip(0)
-      cur = aspirate(0, 'TubMedia', feedVolume)
-      cur = dispense(
+      aspirate(0, 'TubMedia', feedVolume)
+      dispense(
           0,
           'CulturePlate',
           feedVolume,
@@ -1052,14 +1048,14 @@ def process_plate():
           culture['Column'],
           plateid=request.form['plateid'],
           bottom=True)
-      cur = resuspend(
+      resuspend(
           0,
           'CulturePlate',
           resuspvol,
           culture['Row'],
           culture['Column'],
           plateid=request.form['plateid'])
-      cur = aspirate(
+      aspirate(
           0,
           'CulturePlate',
           500,
@@ -1072,9 +1068,9 @@ def process_plate():
     vol = 0
     for culture in cultures:
       if vol == 0:
-        cur = aspirate(0, 'TubBlood', 1000)
+        aspirate(0, 'TubBlood', 1000)
         vol = 1000
-      cur = dispense(
+      dispense(
           0,
           'CulturePlate',
           500,
@@ -1087,6 +1083,7 @@ def process_plate():
 
   elif request.form['manual'] == 'auto':
     print('pph')
+    # NOT YET IMPLEMENTED
   else:
     raise Exception('Neither manual nor auto chosen')
   email(request.form['email'], 'Processing of plate complete')
@@ -1242,7 +1239,7 @@ def allowed_file(filename):
 
 @app.route('/uploadReadings', methods=['POST'])
 def uploadReadings():
-  # TODO(theosanderson): At present this is all set up just for CytoFlex CSV files. 
+  # TODO(theosanderson): At present this is all set up just for CytoFlex CSV files.
   # We should abstract all this into a cytoflex specific class, provide alternatives,
   # and a way of configuring which one is to be used.
   db = get_db()
@@ -1264,16 +1261,17 @@ def uploadReadings():
         well_name = column_values[0]
         well_name_split = well_name.split('-')
         # get the last element of the first column: this will be the well reference on the measurement plate: A1, C3, etc.
-        location = well_name_split[len(well_name_split) - 1] 
-     
-        if len(well_name_split) > 2: #this skips non-data lines at the top of the CSV
-               
+        location = well_name_split[len(well_name_split) - 1]
+
+        if len(well_name_split
+              ) > 2:  #this skips non-data lines at the top of the CSV
+
           # if there are only two columns, then column 2 will have the parasitaemia
           # measurements. If there are more than 5 then this is the old
           # format and measurements should be in column 8
-          if len(column_values) == 2 :
+          if len(column_values) == 2:
             percent = column_values[1]
-          elif len(column_values) > 7 :
+          elif len(column_values) > 7:
             percent = column_values[7]
 
           if percent != '':
@@ -1286,11 +1284,17 @@ def uploadReadings():
                   'INSERT INTO Measurements (PlateID,Row,Column,MeasurementValue) values (?,?,?,?)',
                   [request.form['plateID'], row, col, percent])
             except sqlite3.IntegrityError:
-              flash('ERROR: Duplicated entries - some of these measurement wells have already had data uploaded to them. Please delete these measurements before uploading replacement data.')
-              return redirect(url_for('show_plate', plateID=request.form['plateID']))
+              flash(
+                  'ERROR: Duplicated entries - some of these measurement wells have already had data uploaded to them. Please delete these measurements before uploading replacement data.'
+              )
+              return redirect(
+                  url_for('show_plate', plateID=request.form['plateID']))
             except Exception as e:
-              flash('ERROR: Loading data into database failed. Please contact administrator. <br><br>Error:'+str(e))
-              return redirect(url_for('show_plate', plateID=request.form['plateID']))
+              flash(
+                  'ERROR: Loading data into database failed. Please contact administrator. <br><br>Error:'
+                  + str(e))
+              return redirect(
+                  url_for('show_plate', plateID=request.form['plateID']))
             measurements = measurements + 1
       db.execute('UPDATE Plates SET PlateFinished=1 WHERE PlateID=?',
                  [request.form['plateID']])
@@ -1451,6 +1455,7 @@ def addPlateForm():
 def checkCalibration():
   db = get_db()
   return render_template('checkCalibration.html')
+
 
 atexit.register(cleanup)
 
