@@ -584,6 +584,17 @@ def process_plate():
     aliquotvol = 20
     resuspvol = 800
     fullVolume = 1000
+  elif platestats['PlateClass'] == 2:
+    cur = db.execute(
+        'INSERT INTO CommandQueue (Command, Labware, LabwareType,Slot) VALUES ("InitaliseLabware","CulturePlate6well","6-well-plate","B1")'
+    )
+    # for 6well plates, teh actual feed volume is more than what is shown here
+    # because we are removing and topping up more than once
+    feedVolume = 900
+    extraRemoval = 15
+    aliquotvol = 20
+    resuspvol = 900
+    fullVolume = 1000
   else:
     raise Exception('Undefined plate class?')
   cur = db.execute(
@@ -820,6 +831,38 @@ def process_plate():
         cur = dispense(1, 'CulturePlate96', feedVolume, 0, row)
       dropTip(1)
       cur = db.execute('INSERT INTO CommandQueue (Command) VALUES ("Home")')
+
+    elif platestats['PlateClass'] == 2:
+      for culture in cultures: 
+        getTip(0)
+        for x in range(5):
+          cur = aspirate(
+            0,
+            'CulturePlate6well',
+            feedVolume + extraRemoval, 
+            culture['Row'], 
+            culture['Column'],
+            plateid=request.form['plateid']
+          )
+          cur = dispense(0, 'trash', feedVolume +extraRemoval)
+        dropTip(0)
+        getTip(0)
+        for x in range(5):
+          cur = aspirate(0, 'TubMedia', feedVolume)
+          onexec = createOnExecute('feed', request.form['plateid'],culture['Row'], culture['Column']) #MG: This has been changed
+          cur = dispense(
+           0,
+           'CulturePlate6well',
+           feedVolume,
+           culture['Row'],
+           culture['Column'],
+           onexec,
+           plateid=request.form['plateid']
+           )
+        
+        dropTip(0)
+      
+
   elif request.form['manual'] == 'dispenseXtoall':
     if platestats['PlateClass'] == 1:
       getTip(0)

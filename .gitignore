@@ -2,7 +2,8 @@
 local_config.cfg
 logs
 calibrations
+containers
 plasmotron.db
 _*_
-containers
 local_equipment.py
+nohup.out
