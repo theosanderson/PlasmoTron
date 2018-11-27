@@ -1022,68 +1022,6 @@ def process_plate():
 
     dropTip(0)
     cur = db.execute('INSERT INTO CommandQueue (Command) VALUES ("Home")')
-  elif request.form['manual'] == 'feedanddiscard50':
-    aspirate(0, 'TubMedia', 1500)
-    cur = db.execute(
-        'INSERT INTO CommandQueue (Command, Labware, LabwareType,Slot) VALUES ("InitaliseLabware","AliquotPlate","96-flat","C1")'
-    )
-    for culture in cultures:
-      getTip(0)
-      aspirate(
-          0,
-          'CulturePlate',
-          feedVolume + extraRemoval,
-          culture['Row'],
-          culture['Column'],
-          plateid=request.form['plateid'])
-      airgap(0)
-      dropTip(0)
-      getTip(0)
-      aspirate(0, 'TubMedia', feedVolume)
-      dispense(
-          0,
-          'CulturePlate',
-          feedVolume,
-          culture['Row'],
-          culture['Column'],
-          plateid=request.form['plateid'],
-          bottom=True)
-      resuspend(
-          0,
-          'CulturePlate',
-          resuspvol,
-          culture['Row'],
-          culture['Column'],
-          plateid=request.form['plateid'])
-      aspirate(
-          0,
-          'CulturePlate',
-          500,
-          culture['Row'],
-          culture['Column'],
-          plateid=request.form['plateid'])
-      airgap(0)
-      dropTip(0)
-    getTip(0)
-    vol = 0
-    for culture in cultures:
-      if vol == 0:
-        aspirate(0, 'TubBlood', 1000)
-        vol = 1000
-      dispense(
-          0,
-          'CulturePlate',
-          500,
-          culture['Row'],
-          culture['Column'],
-          plateid=request.form['plateid'])
-      vol = vol - 1000
-
-    dropTip(0)
-
-  elif request.form['manual'] == 'auto':
-    print('pph')
-    # NOT YET IMPLEMENTED
   else:
     raise Exception('Neither manual nor auto chosen')
   email(request.form['email'], 'Processing of plate complete')
