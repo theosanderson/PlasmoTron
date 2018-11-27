@@ -566,6 +566,7 @@ def process_plate():
   platestats = cur.fetchone()
 
   if platestats['PlateClass'] == 0:
+     # 96 well plates (poorly supported at present)
     cur = db.execute(
         'INSERT INTO CommandQueue (Command, Labware, LabwareType,Slot) VALUES ("InitaliseLabware","CulturePlate","96-flat","B1")'
     )
@@ -576,6 +577,7 @@ def process_plate():
     resuspvol = 150
 
   elif platestats['PlateClass'] == 1:
+    # 24-well plates
     cur = db.execute(
         'INSERT INTO CommandQueue (Command, Labware, LabwareType,Slot) VALUES ("InitaliseLabware","CulturePlate","24-well-plate","B1")'
     )
@@ -585,10 +587,11 @@ def process_plate():
     resuspvol = 800
     fullVolume = 1000
   elif platestats['PlateClass'] == 2:
+     # 6 well plates
     cur = db.execute(
         'INSERT INTO CommandQueue (Command, Labware, LabwareType,Slot) VALUES ("InitaliseLabware","CulturePlate6well","6-well-plate","B1")'
     )
-    # for 6well plates, teh actual feed volume is more than what is shown here
+    # for 6well plates, the actual feed volume is more than what is shown here
     # because we are removing and topping up more than once
     feedVolume = 900
     extraRemoval = 15
@@ -748,13 +751,13 @@ def process_plate():
     dropTip(0)
     for item in addback:
       getTip(0)
-      cur = resuspend(
+      resuspend(
           0, 'CulturePlate', item[0], item[1], item[2], plateid=item[3])
-      cur = aspirate(
+      aspirate(
           0, 'CulturePlate', item[0], item[1], item[2], plateid=item[3])
       onexec = createOnExecute('split', request.form['plateid'], culture['Row'],
                                culture['Column'], item[4])
-      cur = dispense(
+      dispense(
           0,
           'CulturePlate2',
           item[0],
@@ -764,7 +767,7 @@ def process_plate():
           plateid=item[3],
           bottom=True)
       dropTip(0)
-
+  # TODO: branch below can probably be deleted
   elif request.form['manual'] == 'dispense-sybr-green':
     getTip(0)
     curvol = 0
@@ -776,19 +779,20 @@ def process_plate():
         cur = dispense(0, 'AliquotPlate', 200, x, y)
         curvol = curvol - 200
     dropTip(0)
+  # TODO: branch below can probably be deleted
   elif request.form['manual'] == 'dispense-sybr-green2':
     getTip(1)
 
     for x in range(4):
-      cur = aspirate(1, 'TubSybr', 200)
-      cur = dispense(1, 'AliquotPlate', 200, 0, x)
+      aspirate(1, 'TubSybr', 200)
+      dispense(1, 'AliquotPlate', 200, 0, x)
     dropTip(1)
 
   elif request.form['manual'] == 'feed':
     if platestats['PlateClass'] == 1:
       for culture in cultures:
         getTip(0)
-        cur = aspirate(
+        aspirate(
             0,
             'CulturePlate',
             feedVolume + extraRemoval,
@@ -800,10 +804,10 @@ def process_plate():
       getTip(0)
       for culture in cultures:
 
-        cur = aspirate(0, 'TubMedia', feedVolume)
+        aspirate(0, 'TubMedia', feedVolume)
         onexec = createOnExecute('feed', request.form['plateid'],
                                  culture['Row'], culture['Column'])
-        cur = dispense(
+        dispense(
             0,
             'CulturePlate',
             feedVolume,
@@ -813,7 +817,7 @@ def process_plate():
             plateid=request.form['plateid'])
 
       dropTip(0)
-      cur = db.execute('INSERT INTO CommandQueue (Command) VALUES ("Home")')
+      db.execute('INSERT INTO CommandQueue (Command) VALUES ("Home")')
     elif platestats['PlateClass'] == 0:
       rows = {}
       for culture in cultures:
@@ -822,21 +826,22 @@ def process_plate():
       rows = rows.keys()
       for row in rows:
         getTip(1)
-        cur = aspirate(1, 'CulturePlate96', feedVolume, 0, row)
-        cur = dispense(1, 'trash', feedVolume)
+        aspirate(1, 'CulturePlate96', feedVolume, 0, row)
+        dispense(1, 'trash', feedVolume)
         dropTip(1)
       getTip(1)
       for row in rows:
-        cur = aspirate(1, 'TubMedia', feedVolume)
-        cur = dispense(1, 'CulturePlate96', feedVolume, 0, row)
+        aspirate(1, 'TubMedia', feedVolume)
+        dispense(1, 'CulturePlate96', feedVolume, 0, row)
       dropTip(1)
-      cur = db.execute('INSERT INTO CommandQueue (Command) VALUES ("Home")')
+      db.execute('INSERT INTO CommandQueue (Command) VALUES ("Home")')
 
     elif platestats['PlateClass'] == 2:
+     # 6-well plates
       for culture in cultures: 
         getTip(0)
         for x in range(5):
-          cur = aspirate(
+          aspirate(
             0,
             'CulturePlate6well',
             feedVolume + extraRemoval, 
@@ -844,13 +849,16 @@ def process_plate():
             culture['Column'],
             plateid=request.form['plateid']
           )
-          cur = dispense(0, 'trash', feedVolume +extraRemoval)
+          dispense(0, 'trash', feedVolume +extraRemoval)
         dropTip(0)
         getTip(0)
         for x in range(5):
-          cur = aspirate(0, 'TubMedia', feedVolume)
-          onexec = createOnExecute('feed', request.form['plateid'],culture['Row'], culture['Column']) #MG: This has been changed
-          cur = dispense(
+          aspirate(0, 'TubMedia', feedVolume)
+          if x == 0: # record feed once only
+            onexec = createOnExecute('feed', request.form['plateid'],culture['Row'], culture['Column'])
+          else:
+            onexec = None
+          dispense(
            0,
            'CulturePlate6well',
            feedVolume,
