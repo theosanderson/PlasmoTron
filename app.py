@@ -864,7 +864,19 @@ def process_plate():
               culture['Column'],
               onexec,
               plateid=request.form['plateid'])
-
+        """ 6well plates have large wells, hence the need to
+            resuspend at the end of a feed to avoid uneven distribution
+            of red blood cells at bottom of well, which we don't need
+            to do in 24well format
+        """ 
+        resuspend(
+            0,
+            'CulturePlate6well',
+            800,
+            culture['Row'],
+            culture['Column'],
+            plateid=request.form['plateid']
+        )
         dropTip(0)
 
   elif request.form['manual'] == 'dispenseXtoall':
