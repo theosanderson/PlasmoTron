@@ -656,6 +656,67 @@ def process_plate():
           0, 'CulturePlate', item[0], item[1], item[2], onexec, plateid=item[3])
     dropTip(0)
 
+
+  """
+  This protocol combines the handling of growing and non-growing cultures:
+  a culture with parasitaemia above a minParasitaemia threshold is deemed to 
+  be growing and thus split to new x% parasitaemia. All other
+  cultures are not (yet) growing and we just keep 33% of the volume and top up
+  to keep them going until they start to grow.
+  This is all done on a single plate, not transferring to new plate.
+  """
+  if request.form['manual'] == 'condsplitdilute':
+    minParasitaemia = 0.3
+    cur = db.execute(
+        'SELECT *, PlatePositions.Row AS Row, PlatePositions.Column AS Column FROM Cultures INNER JOIN PlatePositions ON Cultures.CultureID = PlatePositions.CultureID INNER JOIN Plates ON Plates.PlateID=PlatePositions.PlateID AND Plates.PlatePurpose=1 INNER JOIN ( SELECT MAX(timeSampled),* FROM Measurements INNER JOIN PlatePositions ON PlatePositions.Row=Measurements.Row AND PlatePositions.Column=Measurements.Column AND PlatePositions.PlateID = Measurements.PlateID GROUP BY CultureID ) latestparasitaemia ON Cultures.CultureID=latestparasitaemia.CultureID WHERE PlatePositions.PlateID = ?',
+        [request.form['plateid']])
+    splitcultures = cur.fetchall()
+    splitcultures = calcExpectedParasitaemas(splitcultures)
+    desiredParasitaemia = float(request.form['parasitaemia'])
+    if not (desiredParasitaemia > 0 and desiredParasitaemia < 101):
+      return ('Error, parasitaemia must be >0 and <100')
+    addback = []
+    for culture in splitcultures:
+      if culture['expectednow'] > desiredParasitaemia and culture['expectednow'] >= minParasitaemia:
+        factor = desiredParasitaemia / culture['expectednow']
+      else:
+        factor = 0.333333333
+      amountToRemove = (1 - factor) * fullVolume
+      getTip(0)
+      resuspend(
+          0,
+          'CulturePlate',
+          resuspvol,
+          culture['Row'],
+          culture['Column'],
+          plateid=request.form['plateid'],
+          double=True)
+      aspirate(
+          0,
+          'CulturePlate',
+          amountToRemove,
+          culture['Row'],
+          culture['Column'],
+          plateid=request.form['plateid'])
+      airgap(0)
+      dropTip(0)
+      addback.append([
+          amountToRemove, culture['Row'], culture['Column'],
+          request.form['plateid'], factor
+      ])
+
+    getTip(0)
+    resuspendReservoir(0, 'TubBlood')
+    
+    for item in addback:
+      aspirate(0, 'TubBlood', item[0])
+      onexec = createOnExecute('split', request.form['plateid'], item[1],
+                               item[2], item[4])
+      dispense(
+          0, 'CulturePlate', item[0], item[1], item[2], onexec, plateid=item[3])
+    dropTip(0)
+
+
   elif request.form['manual'] == 'splittonewplate':
     cur = db.execute(
         'SELECT *, PlatePositions.Row AS Row, PlatePositions.Column AS Column FROM Cultures INNER JOIN PlatePositions ON Cultures.CultureID = PlatePositions.CultureID INNER JOIN Plates ON Plates.PlateID=PlatePositions.PlateID AND Plates.PlatePurpose=1 INNER JOIN ( SELECT MAX(timeSampled),* FROM Measurements INNER JOIN PlatePositions ON PlatePositions.Row=Measurements.Row AND PlatePositions.Column=Measurements.Column AND PlatePositions.PlateID = Measurements.PlateID GROUP BY CultureID ) latestparasitaemia ON Cultures.CultureID=latestparasitaemia.CultureID WHERE PlatePositions.PlateID = ?',
@@ -712,6 +773,8 @@ def process_plate():
           plateid=item[3],
           bottom=True)
       dropTip(0)
+
+
   elif request.form['manual'] == 'dilutenewplate':
 
     desiredParasitaemia = float(request.form['parasitaemia'])
