@@ -666,7 +666,6 @@ def process_plate():
   This is all done on a single plate, not transferring to new plate.
   """
   if request.form['manual'] == 'condsplitdilute':
-    minParasitaemia = 0.3
     cur = db.execute(
         'SELECT *, PlatePositions.Row AS Row, PlatePositions.Column AS Column FROM Cultures INNER JOIN PlatePositions ON Cultures.CultureID = PlatePositions.CultureID INNER JOIN Plates ON Plates.PlateID=PlatePositions.PlateID AND Plates.PlatePurpose=1 INNER JOIN ( SELECT MAX(timeSampled),* FROM Measurements INNER JOIN PlatePositions ON PlatePositions.Row=Measurements.Row AND PlatePositions.Column=Measurements.Column AND PlatePositions.PlateID = Measurements.PlateID GROUP BY CultureID ) latestparasitaemia ON Cultures.CultureID=latestparasitaemia.CultureID WHERE PlatePositions.PlateID = ?',
         [request.form['plateid']])
@@ -677,10 +676,8 @@ def process_plate():
       return ('Error, parasitaemia must be >0 and <100')
     addback = []
     for culture in splitcultures:
-      if culture['expectednow'] > desiredParasitaemia and culture['expectednow'] >= minParasitaemia:
         factor = desiredParasitaemia / culture['expectednow']
-      else:
-        factor = 0.333333333
+        factor = min(factor, 0.3333333)
       amountToRemove = (1 - factor) * fullVolume
       getTip(0)
       resuspend(
