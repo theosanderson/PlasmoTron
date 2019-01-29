@@ -1400,6 +1400,24 @@ def cleanup():
   killQueueProcessor()
 
 
+"""
+    This method was set up to estimae the current parasitaemia
+    based on the last known parasitaemia and the time difference
+    but it is "bypassed" now: we simply return the measured value
+    as the "expectednow" value, so the last measured parasitaemia
+    is used as-is and no extrapolation is attempted any more. 
+    Left the method here in case we ever want to go back to it. Also
+    would need to make sure that nothing else depends on timediff for example
+    There are two reasons for the removal of calculated parasitaemia:
+    1) The formula does not actually calculate parasitaemia, i.e. percentage
+       of infected blood cells. It calculates a number of cells from 
+       a known starting point using an exponential growth model. Treating
+       parasitaemia like cell numbers will lead to parasitaemia >100% at
+       some point. It would not be trivial to actually estimate parasitaemia
+       because the number of available blood cells would have to be known.
+    2) The formula is species-specific. In fact, the one used here applies only
+       to knowlesi and would need to be modified for falciparum
+"""
 def calcExpectedParasitaemas(sqlrows):
   newlist = []
   for row in sqlrows:
@@ -1412,8 +1430,12 @@ def calcExpectedParasitaemas(sqlrows):
       timediffhours = timediff / (60 * 60)
       timediffcycles = timediffhours / 27.5
       growthpercycle = 3.5
-      expectednow = d['MeasurementValue'] * (growthpercycle**timediffcycles)
-      d['expectednow'] = expectednow
+#-------------------------------------------------- 
+#      remove comment if we want to calculate expected value again
+#      expectednow = d['MeasurementValue'] * (growthpercycle**timediffcycles)
+#       d['expectednow'] = expectednow
+#-------------------------------------------------- 
+      d['expectednow'] = d['MeasurementValue']
       d['timediffhours'] = timediffhours
       newlist.append(d)
   return (newlist)
