@@ -657,15 +657,15 @@ def process_plate():
     dropTip(0)
 
 
-  """
-  This protocol combines the handling of growing and non-growing cultures:
-  a culture with parasitaemia above a minParasitaemia threshold is deemed to 
-  be growing and thus split to new x% parasitaemia. All other
-  cultures are not (yet) growing and we just keep 33% of the volume and top up
-  to keep them going until they start to grow.
-  This is all done on a single plate, not transferring to new plate.
-  """
-  if request.form['manual'] == 'condsplitdilute':
+    '''
+    This protocol combines the handling of growing and non-growing cultures:
+    a culture with parasitaemia above a minParasitaemia threshold is deemed to 
+    be growing and thus split to new x% parasitaemia. All other
+    cultures are not (yet) growing and we just keep 33% of the volume and top up
+    to keep them going until they start to grow.
+    This is all done on a single plate, not transferring to new plate.
+    '''
+  elif request.form['manual'] == 'condsplitdilute':
     minParasitaemia = 0.3
     cur = db.execute(
         'SELECT *, PlatePositions.Row AS Row, PlatePositions.Column AS Column FROM Cultures INNER JOIN PlatePositions ON Cultures.CultureID = PlatePositions.CultureID INNER JOIN Plates ON Plates.PlateID=PlatePositions.PlateID AND Plates.PlatePurpose=1 INNER JOIN ( SELECT MAX(timeSampled),* FROM Measurements INNER JOIN PlatePositions ON PlatePositions.Row=Measurements.Row AND PlatePositions.Column=Measurements.Column AND PlatePositions.PlateID = Measurements.PlateID GROUP BY CultureID ) latestparasitaemia ON Cultures.CultureID=latestparasitaemia.CultureID WHERE PlatePositions.PlateID = ?',
