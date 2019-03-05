@@ -17,6 +17,8 @@ import string
 ALLOWED_EXTENSIONS = set(['csv'])
 
 
+
+
 def eprint(*args, **kwargs):
   print(*args, file=sys.stderr, **kwargs)
 
@@ -715,6 +717,68 @@ def process_plate():
       dispense(
           0, 'CulturePlate', item[0], item[1], item[2], onexec, plateid=item[3])
     dropTip(0)
+    
+
+
+  elif request.form['manual'] == 'condsplitnewplate':
+    
+    # This is the same as condsplitdilute but it transfers to a
+    # new plate. Cultures with parasitaemia above 0.3 are treated
+    # as growing cultures and set to target parasitaemia on the
+    # new plate. For non-growing cultures, 1/3 is transferred to 
+    # the new plate
+    minParasitaemia = 0.3
+    cur = db.execute(
+        'SELECT *, PlatePositions.Row AS Row, PlatePositions.Column AS Column FROM Cultures INNER JOIN PlatePositions ON Cultures.CultureID = PlatePositions.CultureID INNER JOIN Plates ON Plates.PlateID=PlatePositions.PlateID AND Plates.PlatePurpose=1 INNER JOIN ( SELECT MAX(timeSampled),* FROM Measurements INNER JOIN PlatePositions ON PlatePositions.Row=Measurements.Row AND PlatePositions.Column=Measurements.Column AND PlatePositions.PlateID = Measurements.PlateID GROUP BY CultureID ) latestparasitaemia ON Cultures.CultureID=latestparasitaemia.CultureID WHERE PlatePositions.PlateID = ?',
+        [request.form['plateid']])
+    splitcultures = cur.fetchall()
+    splitcultures = calcExpectedParasitaemas(splitcultures)
+    desiredParasitaemia = float(request.form['parasitaemia'])
+    if not (desiredParasitaemia > 0 and desiredParasitaemia < 101):
+      return ('Error, parasitaemia must be >0 and <100')
+    addback = []
+    getTip(0)
+    resuspendReservoir(0, 'TubBlood')
+    for culture in splitcultures:
+      if culture['expectednow'] > desiredParasitaemia and culture['expectednow'] >= minParasitaemia:
+        factor = desiredParasitaemia / culture['expectednow']
+      else:
+        factor = 0.333333333
+
+      amountToTransfer = (factor) * fullVolume
+      amountOfNewBlood = (1 - factor) * fullVolume
+
+      aspirate(0, 'TubBlood', amountOfNewBlood)
+      dispense(
+          0,
+          'CulturePlate2',
+          amountOfNewBlood,
+          culture['Row'],
+          culture['Column'],
+          plateid=request.form['plateid'])
+
+      addback.append([
+          amountToTransfer, culture['Row'], culture['Column'],
+          request.form['plateid'], factor
+      ])
+
+    dropTip(0)
+    for item in addback:
+      getTip(0)
+      resuspend(0, 'CulturePlate', 800, item[1], item[2], plateid=item[3],double=True)
+      aspirate(0, 'CulturePlate', item[0], item[1], item[2], plateid=item[3])
+      onexec = createOnExecute('split', request.form['plateid'], culture['Row'],
+                               culture['Column'], item[4])
+      dispense(
+          0,
+          'CulturePlate2',
+          item[0],
+          item[1],
+          item[2],
+          onexec,
+          plateid=item[3],
+          bottom=True)
+      dropTip(0)
 
 
   elif request.form['manual'] == 'splittonewplate':
