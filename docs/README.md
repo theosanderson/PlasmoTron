@@ -11,7 +11,7 @@ Specifically PlasmoTron provides these features:
 * an intelligent system to use this parasitaemia data to decide how to split parasites
 
 # Development status
-PlasmoTron is not a commercial product. It is a system we have built in the lab to simplify our own culture, and which we offer to others in case it is helpful. PlasmoTron remains under active development and new features continue to be integrated. Please feel free to [get in touch](mailto:ts10@sanger.ac.uk) to discuss whether PlasmoTron is likely to be suitable for you in its current iteration.
+PlasmoTron is not a commercial product. It is a system we have built in the lab to simplify our own culture, and which we offer to others in case it is helpful. PlasmoTron remains under active development and new features continue to be integrated. Please feel free to [get in touch](mailto:theo@theo.io) to discuss whether PlasmoTron is likely to be suitable for you in its current iteration.
 
 
 # Getting started
